@@ -1,0 +1,6 @@
+// create a git ignore file
+
+node_modules/
+dist/
+
+.env
