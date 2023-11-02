@@ -5,18 +5,8 @@ import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
 import cors from "cors";
 import express from "express";
-
-const typeDefs = `#graphql
-  type Query {
-    hello: String!
-  }
-`;
-
-const resolvers = {
-  Query: {
-    hello: () => "hello world",
-  },
-};
+import { buildSchema } from "type-graphql";
+import { HelloResolver } from "./resolvers/hello";
 
 const main = async () => {
   // Database connection
@@ -25,9 +15,13 @@ const main = async () => {
 
   const app = express();
 
+  const schema = await buildSchema({
+    resolvers: [HelloResolver],
+    validate: false,
+  });
+
   const server = new ApolloServer({
-    typeDefs,
-    resolvers,
+    schema,
   });
 
   await server.start();
