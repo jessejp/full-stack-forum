@@ -7,6 +7,7 @@ import cors from "cors";
 import express from "express";
 import { buildSchema } from "type-graphql";
 import { HelloResolver } from "./resolvers/hello";
+import { PostResolver } from "./resolvers/post";
 
 const main = async () => {
   // Database connection
@@ -16,7 +17,7 @@ const main = async () => {
   const app = express();
 
   const schema = await buildSchema({
-    resolvers: [HelloResolver],
+    resolvers: [HelloResolver, PostResolver],
     validate: false,
   });
 
@@ -30,7 +31,9 @@ const main = async () => {
     "/graphql",
     cors<cors.CorsRequest>(),
     express.json(),
-    expressMiddleware(server)
+    expressMiddleware(server, {
+      context: async () => ({ em: orm.em.fork() }),
+    })
   );
 
   // Modified server startup
