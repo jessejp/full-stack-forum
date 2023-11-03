@@ -6,7 +6,8 @@
   "scripts": {
     "watch": "tsc -w",
     "start": "nodemon dist/index.js",
-    "start-ts": "nodemon --exec ts-node src/index.ts"
+    "start-ts": "nodemon --exec ts-node src/index.ts",
+    "create:migration": "mikro-orm migration:create"
   },
   "mikro-orm": {
     "useTsNode": true,

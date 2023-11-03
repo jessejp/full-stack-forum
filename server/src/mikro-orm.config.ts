@@ -1,5 +1,6 @@
 import { __prod__ } from "./constants";
 import { Post } from "./entities/Post";
+import { User } from "./entities/User";
 import { PostgreSqlDriver, defineConfig } from "@mikro-orm/postgresql";
 import path from "path";
 
@@ -8,7 +9,7 @@ export default defineConfig({
   migrations: {
     path: path.join(__dirname, "./migrations"),
   },
-  entities: [Post],
+  entities: [Post, User],
   dbName: "postgres",
   user: "postgres",
   password: "postgres",
