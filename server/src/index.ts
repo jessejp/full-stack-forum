@@ -8,6 +8,7 @@ import express from "express";
 import { buildSchema } from "type-graphql";
 import { HelloResolver } from "./resolvers/hello";
 import { PostResolver } from "./resolvers/post";
+import { UserResolver } from "./resolvers/user";
 
 const main = async () => {
   // Database connection
@@ -17,7 +18,7 @@ const main = async () => {
   const app = express();
 
   const schema = await buildSchema({
-    resolvers: [HelloResolver, PostResolver],
+    resolvers: [HelloResolver, PostResolver, UserResolver],
     validate: false,
   });
 
