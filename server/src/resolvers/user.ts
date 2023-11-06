@@ -7,7 +7,6 @@ import {
   InputType,
   Mutation,
   ObjectType,
-  Query,
   Resolver,
 } from "type-graphql";
 import argon2 from "argon2";
@@ -92,7 +91,7 @@ export class UserResolver {
   @Mutation(() => UserResponse)
   async login(
     @Arg("options") options: UsernamePasswordInput,
-    @Ctx() { em }: MyContext
+    @Ctx() { em, req }: MyContext
   ): Promise<UserResponse> {
     const user = await em.findOne(User, { username: options.username });
     const errors: FieldError[] = [];
@@ -117,6 +116,8 @@ export class UserResolver {
         errors,
       };
     }
+
+    // req.session.userId = user._id;
 
     return {
       user,

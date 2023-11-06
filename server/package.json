@@ -24,14 +24,18 @@
     "@mikro-orm/migrations": "^5.9.0",
     "@mikro-orm/postgresql": "^5.9.0",
     "argon2": "^0.31.2",
+    "connect-redis": "^7.1.0",
     "cors": "^2.8.5",
     "express": "^4.18.2",
+    "express-session": "^1.17.3",
     "graphql": "^16.8.1",
     "pg": "^8.11.3",
+    "redis": "^4.6.10",
     "type-graphql": "^2.0.0-beta.3"
   },
   "devDependencies": {
     "@types/cors": "^2.8.15",
+    "@types/express-session": "^1.17.9",
     "@types/node": "^20.8.9",
     "nodemon": "^3.0.1",
     "ts-node": "^10.9.1",
