@@ -56,12 +56,12 @@ const main = async () => {
       store: redisStore,
       cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 365 * 10,
-        httpOnly: true,
+        httpOnly: true, // disable client-side JS access
         sameSite: "lax",
         secure: __prod__,
       },
-      resave: false,
-      saveUninitialized: false,
+      resave: false, // required: force lightweight session keep alive (touch)
+      saveUninitialized: false, // false: only save session when data exists
       secret: "afjkjtysyjksfayrtayuthai56hj6ws6",
     }),
     expressMiddleware(server, {
