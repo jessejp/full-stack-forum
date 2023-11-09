@@ -22,13 +22,12 @@ const main = async () => {
   const app = express();
 
   // Initialize client.
-  let redisClient = createClient();
+  const redisClient = createClient();
   redisClient.connect().catch(console.error);
 
   // Initialize store.
-  let redisStore = new RedisStore({
+  const redisStore = new RedisStore({
     client: redisClient,
-    prefix: "myapp:",
     disableTouch: true,
   });
 
@@ -43,25 +42,33 @@ const main = async () => {
 
   await server.start();
 
+  app.set("trust proxy", !__prod__);
+
   app.use(
     "/graphql",
-    cors<cors.CorsRequest>(),
+    cors<cors.CorsRequest>({
+      credentials: true,
+      origin: ["http://localhost:4000"],
+    }),
     express.json(),
     session({
       name: "qid",
       store: redisStore,
       cookie: {
-        maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 years in ms
-        httpOnly: true, // recommended: disable client-side js access
-        sameSite: "lax", // recommended: protection against csrf
-        secure: __prod__, // recommended: only send cookie over https
+        maxAge: 1000 * 60 * 60 * 24 * 365 * 10,
+        httpOnly: true,
+        sameSite: "lax",
+        secure: __prod__,
       },
-      resave: false, // required: force lightweight session keep alive (touch)
-      saveUninitialized: false, // recommended: only save session when data exists
+      resave: false,
+      saveUninitialized: false,
       secret: "afjkjtysyjksfayrtayuthai56hj6ws6",
     }),
     expressMiddleware(server, {
-      context: async ({ req, res }) => ({ em: orm.em.fork(), req, res }),
+      context: async ({ req, res }) => {
+        req.headers["x-forwarded-proto"] = "https";
+        return { em: orm.em.fork(), req, res };
+      },
     })
   );
 
