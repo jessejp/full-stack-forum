@@ -48,7 +48,7 @@ const main = async () => {
     "/graphql",
     cors<cors.CorsRequest>({
       credentials: true,
-      origin: ["http://localhost:4000"],
+      origin: ["http://localhost:3000"],
     }),
     express.json(),
     session({
