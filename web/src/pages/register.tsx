@@ -2,27 +2,14 @@ import { Formik } from "formik";
 import { Box, Button, Flex, VStack } from "@chakra-ui/react";
 import InputField from "@/components/InputField";
 import type { NextPage } from "next";
-import { gql, useMutation } from "@apollo/client";
-
-const REGISTER_USER = gql`
-  mutation Register($options: UsernamePasswordInput!) {
-    register(options: $options) {
-      errors {
-        field
-        message
-      }
-      user {
-        _id
-        username
-      }
-    }
-  }
-`;
+import { useMutation } from "@apollo/client";
+import { REGISTER_USER } from "@/graphql/mutations/register";
+import { RegisterMutation } from "@/generated/graphql";
 
 interface RegisterProps {}
 
 const Register: NextPage<RegisterProps> = ({}) => {
-  const [register] = useMutation(REGISTER_USER);
+  const [register] = useMutation<RegisterMutation>(REGISTER_USER);
   return (
     <Flex bg="gray.100" align="center" justify="center" h="100vh">
       <Box bg="white" p={6} rounded="md" w={64}>
@@ -31,8 +18,10 @@ const Register: NextPage<RegisterProps> = ({}) => {
             username: "",
             password: "",
           }}
-          onSubmit={(values) => {
-            return register({ variables: { options: values } });
+          onSubmit={async (values) => {
+            const response = await register({ variables: { options: values } });
+            // response.data?.register.user?.username;
+            return response;
           }}
         >
           {({ handleSubmit, isSubmitting }) => (
