@@ -1,35 +1,32 @@
 import { Formik } from "formik";
-import { Box, Button, Flex, Heading, VStack } from "@chakra-ui/react";
+import { Box, Button, Flex, VStack, Heading } from "@chakra-ui/react";
 import InputField from "@/components/InputField";
 import { useRouter } from "next/router";
 import type { NextPage } from "next";
 import { useMutation } from "@apollo/client";
-import { REGISTER_USER } from "@/graphql/mutations/register";
-import { RegisterMutation } from "@/generated/graphql";
+import { LoginMutation } from "@/generated/graphql";
 import { toErrorMap } from "@/utils/toErrorMap";
+import { LOGIN_USER } from "@/graphql/mutations/login";
 
-
-const Register: NextPage = ({}) => {
+const Login: NextPage = () => {
   const router = useRouter();
-  const [register] = useMutation<RegisterMutation>(REGISTER_USER);
+  const [login] = useMutation<LoginMutation>(LOGIN_USER);
   return (
     <Flex bg="gray.100" align="center" justify="center" h="100vh">
       <Box bg="white" p={6} rounded="md" w={64}>
         <VStack spacing={4} align="flex-start">
-          <Heading size="md">Register New User</Heading>
+          <Heading size='md'>Login</Heading>
           <Formik
             initialValues={{
               username: "",
               password: "",
             }}
             onSubmit={async (values, { setErrors }) => {
-              const response = await register({
-                variables: { options: values },
-              });
+              const response = await login({ variables: { options: values } });
 
-              if (response.data?.register.errors) {
-                setErrors(toErrorMap(response.data.register.errors));
-              } else if (response.data?.register.user) {
+              if (response.data?.login.errors) {
+                setErrors(toErrorMap(response.data.login.errors));
+              } else if (response.data?.login.user) {
                 router.push("/");
                 return response;
               }
@@ -58,7 +55,7 @@ const Register: NextPage = ({}) => {
                     colorScheme="purple"
                     width="full"
                   >
-                    Register
+                    Login
                   </Button>
                 </VStack>
               </form>
@@ -70,4 +67,4 @@ const Register: NextPage = ({}) => {
   );
 };
 
-export default Register;
+export default Login;
