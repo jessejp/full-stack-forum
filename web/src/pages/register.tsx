@@ -1,14 +1,17 @@
 import { Formik } from "formik";
 import { Box, Button, Flex, VStack } from "@chakra-ui/react";
 import InputField from "@/components/InputField";
+import { useRouter } from "next/router";
 import type { NextPage } from "next";
 import { useMutation } from "@apollo/client";
 import { REGISTER_USER } from "@/graphql/mutations/register";
 import { RegisterMutation } from "@/generated/graphql";
+import { toErrorMap } from "@/utils/toErrorMap";
 
 interface RegisterProps {}
 
 const Register: NextPage<RegisterProps> = ({}) => {
+  const router = useRouter();
   const [register] = useMutation<RegisterMutation>(REGISTER_USER);
   return (
     <Flex bg="gray.100" align="center" justify="center" h="100vh">
@@ -18,10 +21,15 @@ const Register: NextPage<RegisterProps> = ({}) => {
             username: "",
             password: "",
           }}
-          onSubmit={async (values) => {
+          onSubmit={async (values, { setErrors }) => {
             const response = await register({ variables: { options: values } });
-            // response.data?.register.user?.username;
-            return response;
+
+            if (response.data?.register.errors) {
+              setErrors(toErrorMap(response.data.register.errors));
+            } else if (response.data?.register.user) {
+              router.push("/");
+              return response;
+            }
           }}
         >
           {({ handleSubmit, isSubmitting }) => (
