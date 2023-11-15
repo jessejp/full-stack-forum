@@ -7,66 +7,69 @@ import { useMutation } from "@apollo/client";
 import { REGISTER_USER } from "@/graphql/mutations/register";
 import { RegisterMutation } from "@/generated/graphql";
 import { toErrorMap } from "@/utils/toErrorMap";
-
+import NavBar from "@/components/NavBar";
 
 const Register: NextPage = ({}) => {
   const router = useRouter();
   const [register] = useMutation<RegisterMutation>(REGISTER_USER);
   return (
-    <Flex bg="gray.100" align="center" justify="center" h="100vh">
-      <Box bg="white" p={6} rounded="md" w={64}>
-        <VStack spacing={4} align="flex-start">
-          <Heading size="md">Register New User</Heading>
-          <Formik
-            initialValues={{
-              username: "",
-              password: "",
-            }}
-            onSubmit={async (values, { setErrors }) => {
-              const response = await register({
-                variables: { options: values },
-              });
+    <Box h="100vh" bg="gray.100">
+      <NavBar />
+      <Flex align="center" justify="center" h="100%">
+        <Box bg="white" p={6} rounded="md" w={64}>
+          <VStack spacing={4} align="flex-start">
+            <Heading size="md">Register New User</Heading>
+            <Formik
+              initialValues={{
+                username: "",
+                password: "",
+              }}
+              onSubmit={async (values, { setErrors }) => {
+                const response = await register({
+                  variables: { options: values },
+                });
 
-              if (response.data?.register.errors) {
-                setErrors(toErrorMap(response.data.register.errors));
-              } else if (response.data?.register.user) {
-                router.push("/");
-                return response;
-              }
-            }}
-          >
-            {({ handleSubmit, isSubmitting }) => (
-              <form onSubmit={handleSubmit}>
-                <VStack spacing={4} align="flex-start">
-                  <InputField
-                    label="Username"
-                    type="text"
-                    name="username"
-                    placeholder="enter username"
-                    variant="filled"
-                  />
-                  <InputField
-                    label="Password"
-                    type="password"
-                    name="password"
-                    placeholder="enter password"
-                    variant="filled"
-                  />
-                  <Button
-                    isLoading={isSubmitting}
-                    type="submit"
-                    colorScheme="purple"
-                    width="full"
-                  >
-                    Register
-                  </Button>
-                </VStack>
-              </form>
-            )}
-          </Formik>
-        </VStack>
-      </Box>
-    </Flex>
+                if (response.data?.register.errors) {
+                  setErrors(toErrorMap(response.data.register.errors));
+                } else if (response.data?.register.user) {
+                  router.push("/");
+                  return response;
+                }
+              }}
+            >
+              {({ handleSubmit, isSubmitting }) => (
+                <form onSubmit={handleSubmit}>
+                  <VStack spacing={4} align="flex-start">
+                    <InputField
+                      label="Username"
+                      type="text"
+                      name="username"
+                      placeholder="enter username"
+                      variant="filled"
+                    />
+                    <InputField
+                      label="Password"
+                      type="password"
+                      name="password"
+                      placeholder="enter password"
+                      variant="filled"
+                    />
+                    <Button
+                      isLoading={isSubmitting}
+                      type="submit"
+                      colorScheme="purple"
+                      width="full"
+                    >
+                      Register
+                    </Button>
+                  </VStack>
+                </form>
+              )}
+            </Formik>
+          </VStack>
+        </Box>
+      </Flex>
+    </Box>
   );
 };
 
