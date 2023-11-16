@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 import type { NextPage } from "next";
 import { useMutation } from "@apollo/client";
 import { REGISTER_USER } from "@/graphql/mutations/register";
-import { RegisterMutation } from "@/generated/graphql";
+import { MeDocument, MeQuery, RegisterMutation } from "@/generated/graphql";
 import { toErrorMap } from "@/utils/toErrorMap";
 import NavBar from "@/components/NavBar";
 
@@ -27,6 +27,15 @@ const Register: NextPage = ({}) => {
               onSubmit={async (values, { setErrors }) => {
                 const response = await register({
                   variables: { options: values },
+                  update: (cache, { data }) => {
+                    cache.writeQuery<MeQuery>({
+                      query: MeDocument,
+                      data: {
+                        __typename: "Query",
+                        me: data?.register.user,
+                      },
+                    });
+                  },
                 });
 
                 if (response.data?.register.errors) {

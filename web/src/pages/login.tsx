@@ -4,7 +4,7 @@ import InputField from "@/components/InputField";
 import { useRouter } from "next/router";
 import type { NextPage } from "next";
 import { useMutation } from "@apollo/client";
-import { LoginMutation } from "@/generated/graphql";
+import { LoginMutation, MeDocument } from "@/generated/graphql";
 import { toErrorMap } from "@/utils/toErrorMap";
 import { LOGIN_USER } from "@/graphql/mutations/login";
 import NavBar from "@/components/NavBar";
@@ -27,6 +27,15 @@ const Login: NextPage = () => {
               onSubmit={async (values, { setErrors }) => {
                 const response = await login({
                   variables: { options: values },
+                  update: (cache, { data }) => {
+                    cache.writeQuery({
+                      query: MeDocument,
+                      data: {
+                        __typename: "Query",
+                        me: data?.login.user,
+                      },
+                    });
+                  },
                 });
 
                 if (response.data?.login.errors) {

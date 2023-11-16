@@ -8,11 +8,11 @@ import React from "react";
 interface NavBarProps {}
 
 const NavBar: React.FC<NavBarProps> = ({}) => {
-  const { loading, error, data } = useQuery<MeQuery>(ME_QUERY);
+  const { loading, data } = useQuery<MeQuery>(ME_QUERY);
 
   let authButtons;
 
-  if (loading || error || !data?.me) {
+  if (loading || !data?.me) {
     authButtons = (
       <>
         <Button
@@ -44,7 +44,7 @@ const NavBar: React.FC<NavBarProps> = ({}) => {
       <Stack direction={"row"}>
         <Text>Signed in as: </Text>
         <Text fontWeight={600} color={"purple"}>
-          {data?.me?.username}
+          {data.me.username}
         </Text>
       </Stack>
     );
