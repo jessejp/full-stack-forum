@@ -1,13 +1,19 @@
-import { MeQuery } from "@/generated/graphql";
+import type { LogoutMutation, MeQuery } from "@/generated/graphql";
+import { LOGOUT_USER } from "@/graphql/mutations/logout";
 import { ME_QUERY } from "@/graphql/queries/me";
-import { useQuery } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client";
 import { Box, Button, Flex, Stack, Text } from "@chakra-ui/react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import React from "react";
 
 interface NavBarProps {}
 
 const NavBar: React.FC<NavBarProps> = ({}) => {
+  const router = useRouter();
+  const [logout, { loading: logoutFetching }] =
+    useMutation<LogoutMutation>(LOGOUT_USER);
+  // const apolloClient = useApolloClient();
   const { loading, data } = useQuery<MeQuery>(ME_QUERY);
 
   let authButtons;
@@ -41,12 +47,24 @@ const NavBar: React.FC<NavBarProps> = ({}) => {
     );
   } else {
     authButtons = (
-      <Stack direction={"row"}>
-        <Text>Signed in as: </Text>
-        <Text fontWeight={600} color={"purple"}>
-          {data.me.username}
-        </Text>
-      </Stack>
+      <Flex wrap={"wrap"} align={"center"} gap={4}>
+        <Stack direction={"row"}>
+          <Text>Signed in as: </Text>
+          <Text fontWeight={600} color={"purple"}>
+            {data?.me?.username}
+          </Text>
+        </Stack>
+        <Button
+          isLoading={logoutFetching}
+          onClick={async () => {
+            await logout();
+            router.reload();
+            // await apolloClient.clearStore();
+          }}
+        >
+          Logout
+        </Button>
+      </Flex>
     );
   }
 
