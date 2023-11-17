@@ -12,7 +12,7 @@ import { UserResolver } from "./resolvers/user";
 import RedisStore from "connect-redis";
 import session from "express-session";
 import { createClient } from "redis";
-import { __prod__ } from "./constants";
+import { COOKIE_NAME, __prod__ } from "./constants";
 
 const main = async () => {
   // Database connection
@@ -48,11 +48,11 @@ const main = async () => {
     "/graphql",
     cors<cors.CorsRequest>({
       credentials: true,
-      origin: ["http://localhost:4000"],
+      origin: ["http://localhost:3000"],
     }),
     express.json(),
     session({
-      name: "qid",
+      name: COOKIE_NAME,
       store: redisStore,
       cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 365 * 10,
