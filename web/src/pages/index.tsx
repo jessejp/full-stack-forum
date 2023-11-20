@@ -1,8 +1,12 @@
 import NavBar from "@/components/NavBar";
-import { Box, Heading } from "@chakra-ui/react";
+import { PostsQuery } from "@/generated/graphql";
+import { POSTS_QUERY } from "@/graphql/queries/posts";
+import { useQuery } from "@apollo/client";
+import { Box, Heading, Stack } from "@chakra-ui/react";
 import Head from "next/head";
 
 export default function Home() {
+  const { data } = useQuery<PostsQuery>(POSTS_QUERY);
   return (
     <>
       <Head>
@@ -13,9 +17,13 @@ export default function Home() {
       </Head>
       <Box>
         <NavBar />
-        <Heading>
-          Welcome!
-        </Heading>
+        <Heading>Welcome!</Heading>
+        <Stack>
+          {!data && <div>Loading...</div>}
+          {data?.posts.map((post) => (
+            <div key={post._id}>{post.title}</div>
+          ))}
+        </Stack>
       </Box>
     </>
   );
