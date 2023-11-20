@@ -4,7 +4,6 @@ import {
   Arg,
   Ctx,
   Field,
-  InputType,
   Mutation,
   ObjectType,
   Query,
@@ -12,15 +11,9 @@ import {
 } from "type-graphql";
 import argon2 from "argon2";
 import { COOKIE_NAME } from "../constants";
-
-@InputType()
-class UsernamePasswordInput {
-  @Field()
-  username: string;
-
-  @Field()
-  password: string;
-}
+import UserInput from "../utils/UserInput";
+import * as EmailValidator from "email-validator";
+import { registerValidation } from "../utils/registerValidation";
 
 @ObjectType()
 class FieldError {
@@ -53,23 +46,15 @@ export class UserResolver {
 
   @Mutation(() => UserResponse)
   async register(
-    @Arg("options") options: UsernamePasswordInput,
+    @Arg("options") options: UserInput,
     @Ctx() { em, req }: MyContext
   ): Promise<UserResponse> {
     const errors: FieldError[] = [];
 
-    if (options.username.length <= 2) {
-      errors.push({
-        field: "username",
-        message: "length must be greater than 2",
-      });
-    }
+    const validationError = registerValidation(options);
 
-    if (options.password.length <= 3) {
-      errors.push({
-        field: "password",
-        message: "length must be greater than 3",
-      });
+    if (validationError) {
+      errors.push(validationError);
     }
 
     if (errors.length) {
@@ -77,10 +62,13 @@ export class UserResolver {
     }
 
     const hashedPassword = await argon2.hash(options.password);
+
     const user = em.create(User, {
       username: options.username,
+      email: options.email,
       password: hashedPassword,
     });
+
     try {
       await em.persistAndFlush(user);
     } catch (err) {
@@ -104,10 +92,37 @@ export class UserResolver {
 
   @Mutation(() => UserResponse)
   async login(
-    @Arg("options") options: UsernamePasswordInput,
+    @Arg("usernameOrEmail") usernameOrEmail: string,
+    @Arg("password") password: string,
     @Ctx() { em, req }: MyContext
   ): Promise<UserResponse> {
-    const user = await em.findOne(User, { username: options.username });
+    if (!usernameOrEmail) {
+      return {
+        errors: [
+          {
+            field: "usernameOrEmail",
+            message: "username or email is required",
+          },
+        ],
+      };
+    } else if (!password) {
+      return {
+        errors: [
+          {
+            field: "password",
+            message: "password is required",
+          },
+        ],
+      };
+    }
+
+    const isEmail = EmailValidator.validate(usernameOrEmail);
+
+    const user = await em.findOne(
+      User,
+      isEmail ? { email: usernameOrEmail } : { username: usernameOrEmail }
+    );
+
     const errors: FieldError[] = [];
 
     if (!user) {
@@ -120,7 +135,7 @@ export class UserResolver {
       };
     }
 
-    const valid = await argon2.verify(user.password, options.password);
+    const valid = await argon2.verify(user.password, password);
     if (!valid) {
       errors.push({
         field: "password",
