@@ -6,6 +6,7 @@ import { Box, Button, Flex, Stack, Text } from "@chakra-ui/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React from "react";
+import { isServer } from "@/utils/isServer";
 
 interface NavBarProps {}
 
@@ -14,7 +15,10 @@ const NavBar: React.FC<NavBarProps> = ({}) => {
   const [logout, { loading: logoutFetching }] =
     useMutation<LogoutMutation>(LOGOUT_USER);
   // const apolloClient = useApolloClient();
-  const { loading, data } = useQuery<MeQuery>(ME_QUERY);
+  const { loading, data } = useQuery<MeQuery>(ME_QUERY, {
+    ssr: false,
+    skip: isServer(),
+  });
 
   let authButtons;
 
