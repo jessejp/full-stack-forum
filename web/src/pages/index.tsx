@@ -1,12 +1,12 @@
 import NavBar from "@/components/NavBar";
 import { PostsQuery } from "@/generated/graphql";
 import { POSTS_QUERY } from "@/graphql/queries/posts";
+import { createApolloClient } from "@/utils/createApolloClient";
 import { useQuery } from "@apollo/client";
 import { Box, Heading, Stack } from "@chakra-ui/react";
 import Head from "next/head";
 
-export default function Home() {
-  const { data } = useQuery<PostsQuery>(POSTS_QUERY);
+export default function Home({ posts }: { posts: PostsQuery["posts"] }) {
   return (
     <>
       <Head>
@@ -19,12 +19,23 @@ export default function Home() {
         <NavBar />
         <Heading>Welcome!</Heading>
         <Stack>
-          {!data && <div>Loading...</div>}
-          {data?.posts.map((post) => (
-            <div key={post._id}>{post.title}</div>
-          ))}
+          {!posts && <div>Loading...</div>}
+          {posts && posts.map((post) => <div key={post._id}>{post.title}</div>)}
         </Stack>
       </Box>
     </>
   );
+}
+
+export async function getServerSideProps() {
+  const client = createApolloClient();
+  const { data } = await client.query<PostsQuery>({
+    query: POSTS_QUERY,
+  });
+
+  return {
+    props: {
+      posts: data.posts,
+    },
+  };
 }
