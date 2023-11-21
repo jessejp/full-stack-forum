@@ -22,6 +22,7 @@ const Register: NextPage = ({}) => {
             <Formik
               initialValues={{
                 username: "",
+                email: "",
                 password: "",
               }}
               onSubmit={async (values, { setErrors }) => {
@@ -54,6 +55,13 @@ const Register: NextPage = ({}) => {
                       type="text"
                       name="username"
                       placeholder="enter username"
+                      variant="filled"
+                    />
+                    <InputField
+                      label="Email"
+                      type="email"
+                      name="email"
+                      placeholder="enter email"
                       variant="filled"
                     />
                     <InputField

@@ -21,12 +21,15 @@ const Login: NextPage = () => {
             <Heading size="md">Login</Heading>
             <Formik
               initialValues={{
-                username: "",
+                usernameOrEmail: "",
                 password: "",
               }}
               onSubmit={async (values, { setErrors }) => {
                 const response = await login({
-                  variables: { options: values },
+                  variables: {
+                    usernameOrEmail: values.usernameOrEmail,
+                    password: values.password,
+                  },
                   update: (cache, { data }) => {
                     cache.writeQuery({
                       query: MeDocument,
@@ -50,9 +53,9 @@ const Login: NextPage = () => {
                 <form onSubmit={handleSubmit}>
                   <VStack spacing={4} align="flex-start">
                     <InputField
-                      label="Username"
+                      label="Username or Email"
                       type="text"
-                      name="username"
+                      name="usernameOrEmail"
                       placeholder="enter username"
                       variant="filled"
                     />
