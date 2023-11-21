@@ -14,7 +14,6 @@ import RedisStore from "connect-redis";
 import session from "express-session";
 import { COOKIE_NAME, __prod__ } from "./constants";
 import Redis from "ioredis";
-// import sendEmail from "./utils/sendEmail";
 
 const main = async () => {
   // Database connection
@@ -25,7 +24,6 @@ const main = async () => {
 
   // Initialize client.
   const redis = new Redis();
-  redis.connect().catch(console.error);
 
   // Initialize store.
   const redisStore = new RedisStore({
