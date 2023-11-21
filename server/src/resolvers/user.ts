@@ -13,7 +13,10 @@ import argon2 from "argon2";
 import { COOKIE_NAME, FORGOT_PASSWORD_PREFIX } from "../constants";
 import UserInput from "../utils/UserInput";
 import * as EmailValidator from "email-validator";
-import { registerValidation } from "../utils/registerValidation";
+import {
+  PasswordValidator,
+  registerValidation,
+} from "../utils/registerValidation";
 import { v4 as uuid } from "uuid";
 import sendEmail from "../utils/sendEmail";
 
@@ -170,7 +173,7 @@ export class UserResolver {
     const token = uuid();
     redis.set(
       `${FORGOT_PASSWORD_PREFIX}${token}`,
-      user.email,
+      user._id,
       "EX",
       1000 * 60 * 60 * 5
     ); // 5 hour expiration
@@ -184,6 +187,61 @@ export class UserResolver {
     await sendEmail(user.email, msg);
 
     return true;
+  }
+
+  @Mutation(() => UserResponse)
+  async changePassword(
+    @Ctx() { em, redis }: MyContext,
+    @Arg("token") token: string,
+    @Arg("newPassword") newPassword: string
+  ): Promise<UserResponse> {
+    const passwordValidation = PasswordValidator(newPassword);
+
+    if (passwordValidation) {
+      return {
+        errors: [
+          {
+            field: "newPassword",
+            message: passwordValidation.message,
+          },
+        ],
+      };
+    }
+
+    const key = `${FORGOT_PASSWORD_PREFIX}${token}`;
+    const userId = await redis.get(key);
+
+    if (!userId) {
+      return {
+        errors: [
+          {
+            field: "token",
+            message: "token expired",
+          },
+        ],
+      };
+    }
+
+    const user = await em.findOne(User, { _id: parseInt(userId) });
+
+    if (!user) {
+      return {
+        errors: [
+          {
+            field: "token",
+            message: "user no longer exists",
+          },
+        ],
+      };
+    }
+    
+    // Delete the redis key to expire token after use
+    await redis.del(key);
+
+    user.password = await argon2.hash(newPassword);
+    em.persistAndFlush(user);
+
+    return { user };
   }
 
   @Mutation(() => Boolean)

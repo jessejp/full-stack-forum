@@ -1,14 +1,17 @@
 import InputField from "@/components/InputField";
 import NavBar from "@/components/NavBar";
+import { ChangePasswordMutation } from "@/generated/graphql";
+import { CHANGE_PASSWORD } from "@/graphql/mutations/changePassword";
+import { toErrorMap } from "@/utils/toErrorMap";
+import { useMutation } from "@apollo/client";
 import { Box, Flex, VStack, Heading, Button } from "@chakra-ui/react";
 import { Formik } from "formik";
 import type { GetStaticPaths, GetStaticPropsContext, NextPage } from "next";
 import router from "next/router";
 import React from "react";
 
-interface ChangePasswordProps {}
-
 const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
+  const [changePassword] = useMutation<ChangePasswordMutation>(CHANGE_PASSWORD);
   return (
     <Box h="100vh" bg="gray.100">
       <NavBar />
@@ -19,19 +22,34 @@ const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
             <Formik
               initialValues={{
                 newPassword: "",
+                repeatNewPassword: "",
               }}
               onSubmit={async (values, { setErrors }) => {
-                // const response = await changePassword({
-                //   variables: {
-                //     ...values,
-                //   },
-                // });
-                // if (response.data?.forgotPassword.errors) {
-                //   setErrors(toErrorMap(response.data.forgotPassword.errors));
-                // } else if (response.data?.forgotPassword) {
-                //   router.push("/");
-                //   return response;
-                // }
+                if (values.newPassword !== values.repeatNewPassword) {
+                  setErrors({
+                    newPassword: "passwords do not match",
+                    repeatNewPassword: "passwords do not match",
+                  });
+                  return;
+                }
+                const response = await changePassword({
+                  variables: {
+                    newPassword: values.newPassword,
+                    token,
+                  },
+                });
+                if (response.data?.changePassword.errors) {
+                  const errorMap = toErrorMap(
+                    response.data.changePassword.errors
+                  );
+                  if ("token" in errorMap) {
+                    router.push("/forgot-password");
+                  }
+                  setErrors(errorMap);
+                } else if (response.data?.changePassword.user) {
+                  router.push("/");
+                  return response;
+                }
               }}
             >
               {({ handleSubmit, isSubmitting }) => (
@@ -41,6 +59,13 @@ const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
                       label="New Password"
                       type="password"
                       name="newPassword"
+                      placeholder="enter new password"
+                      variant="filled"
+                    />
+                    <InputField
+                      label="New Password"
+                      type="password"
+                      name="repeatNewPassword"
                       placeholder="enter new password"
                       variant="filled"
                     />

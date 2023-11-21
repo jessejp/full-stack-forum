@@ -16,12 +16,21 @@ export const registerValidation = (options: UserInput) => {
     };
   }
 
-  if (options.password.length <= 3) {
+  const passwordValidation = PasswordValidator(options.password);
+
+  if (passwordValidation) {
     return {
       field: "password",
-      message: "length must be greater than 3",
+      message: passwordValidation.message,
     };
   }
 
   return null;
 };
+
+export function PasswordValidator(password: string) {
+  if (password.length <= 3) {
+    return { message: "length must be greater than 3" };
+  }
+  return null;
+}
