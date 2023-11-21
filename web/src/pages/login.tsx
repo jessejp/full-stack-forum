@@ -8,6 +8,7 @@ import { LoginMutation, MeDocument } from "@/generated/graphql";
 import { toErrorMap } from "@/utils/toErrorMap";
 import { LOGIN_USER } from "@/graphql/mutations/login";
 import NavBar from "@/components/NavBar";
+import Link from "next/link";
 
 const Login: NextPage = () => {
   const router = useRouter();
@@ -21,12 +22,14 @@ const Login: NextPage = () => {
             <Heading size="md">Login</Heading>
             <Formik
               initialValues={{
-                username: "",
+                usernameOrEmail: "",
                 password: "",
               }}
               onSubmit={async (values, { setErrors }) => {
                 const response = await login({
-                  variables: { options: values },
+                  variables: {
+                    ...values,
+                  },
                   update: (cache, { data }) => {
                     cache.writeQuery({
                       query: MeDocument,
@@ -50,9 +53,9 @@ const Login: NextPage = () => {
                 <form onSubmit={handleSubmit}>
                   <VStack spacing={4} align="flex-start">
                     <InputField
-                      label="Username"
+                      label="Username or Email"
                       type="text"
-                      name="username"
+                      name="usernameOrEmail"
                       placeholder="enter username"
                       variant="filled"
                     />
@@ -75,6 +78,11 @@ const Login: NextPage = () => {
                 </form>
               )}
             </Formik>
+            <Link href="/forgot-password">
+              <Button colorScheme="purple" variant="link">
+                Forgot Password?
+              </Button>
+            </Link>
           </VStack>
         </Box>
       </Flex>

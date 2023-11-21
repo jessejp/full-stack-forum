@@ -1,18 +1,19 @@
+import "dotenv-safe/config";
+import cors from "cors";
+import express from "express";
 import { MikroORM } from "@mikro-orm/core";
 import type { PostgreSqlDriver } from "@mikro-orm/postgresql";
 import MikroORMConfig from "./mikro-orm.config";
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
-import cors from "cors";
-import express from "express";
 import { buildSchema } from "type-graphql";
 import { HelloResolver } from "./resolvers/hello";
 import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
 import RedisStore from "connect-redis";
 import session from "express-session";
-import { createClient } from "redis";
 import { COOKIE_NAME, __prod__ } from "./constants";
+import Redis from "ioredis";
 
 const main = async () => {
   // Database connection
@@ -22,12 +23,11 @@ const main = async () => {
   const app = express();
 
   // Initialize client.
-  const redisClient = createClient();
-  redisClient.connect().catch(console.error);
+  const redis = new Redis();
 
   // Initialize store.
   const redisStore = new RedisStore({
-    client: redisClient,
+    client: redis,
     disableTouch: true,
   });
 
@@ -67,7 +67,7 @@ const main = async () => {
     expressMiddleware(server, {
       context: async ({ req, res }) => {
         req.headers["x-forwarded-proto"] = "https";
-        return { em: orm.em.fork(), req, res };
+        return { em: orm.em.fork(), req, res, redis };
       },
     })
   );

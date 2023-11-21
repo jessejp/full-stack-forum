@@ -1,7 +1,7 @@
 import { gql } from "@apollo/client";
 
 export const REGISTER_USER = gql`
-  mutation Register($options: UsernamePasswordInput!) {
+  mutation Register($options: UserInput!) {
     register(options: $options) {
       errors {
         field
@@ -9,7 +9,9 @@ export const REGISTER_USER = gql`
       }
       user {
         _id
+        createdAt
         username
+        email
       }
     }
   }
