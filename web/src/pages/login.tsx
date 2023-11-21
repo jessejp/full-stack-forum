@@ -8,6 +8,7 @@ import { LoginMutation, MeDocument } from "@/generated/graphql";
 import { toErrorMap } from "@/utils/toErrorMap";
 import { LOGIN_USER } from "@/graphql/mutations/login";
 import NavBar from "@/components/NavBar";
+import Link from "next/link";
 
 const Login: NextPage = () => {
   const router = useRouter();
@@ -77,6 +78,11 @@ const Login: NextPage = () => {
                 </form>
               )}
             </Formik>
+            <Link href="/forgot-password">
+              <Button colorScheme="purple" variant="link">
+                Forgot Password?
+              </Button>
+            </Link>
           </VStack>
         </Box>
       </Flex>
