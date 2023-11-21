@@ -27,8 +27,7 @@ const Login: NextPage = () => {
               onSubmit={async (values, { setErrors }) => {
                 const response = await login({
                   variables: {
-                    usernameOrEmail: values.usernameOrEmail,
-                    password: values.password,
+                    ...values,
                   },
                   update: (cache, { data }) => {
                     cache.writeQuery({
