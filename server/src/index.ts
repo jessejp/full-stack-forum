@@ -19,8 +19,8 @@ import { Post } from "./entities/Post";
 const main = async () => {
   const PostgresDataSource = new DataSource({
     type: "postgres",
-    // host: "localhost",
-    // port: 5432,
+    host: "localhost",
+    port: 5432,
     username: "postgres",
     password: "postgres",
     database: "forum2",
@@ -32,6 +32,8 @@ const main = async () => {
     logging: true,
     synchronize: true,
   });
+
+  PostgresDataSource.initialize();
 
   const app = express();
 
