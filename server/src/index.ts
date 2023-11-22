@@ -1,9 +1,7 @@
+import "reflect-metadata";
 import "dotenv-safe/config";
 import cors from "cors";
 import express from "express";
-import { MikroORM } from "@mikro-orm/core";
-import type { PostgreSqlDriver } from "@mikro-orm/postgresql";
-import MikroORMConfig from "./mikro-orm.config";
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
 import { buildSchema } from "type-graphql";
@@ -14,11 +12,26 @@ import RedisStore from "connect-redis";
 import session from "express-session";
 import { COOKIE_NAME, __prod__ } from "./constants";
 import Redis from "ioredis";
+import { DataSource } from "typeorm";
+import { User } from "./entities/User";
+import { Post } from "./entities/Post";
 
 const main = async () => {
-  // Database connection
-  const orm = await MikroORM.init<PostgreSqlDriver>(MikroORMConfig);
-  await orm.getMigrator().up();
+  const PostgresDataSource = new DataSource({
+    type: "postgres",
+    // host: "localhost",
+    // port: 5432,
+    username: "postgres",
+    password: "postgres",
+    database: "forum2",
+    entities: [
+      // ....
+      User,
+      Post,
+    ],
+    logging: true,
+    synchronize: true,
+  });
 
   const app = express();
 
@@ -67,7 +80,7 @@ const main = async () => {
     expressMiddleware(server, {
       context: async ({ req, res }) => {
         req.headers["x-forwarded-proto"] = "https";
-        return { em: orm.em.fork(), req, res, redis };
+        return { req, res, redis };
       },
     })
   );
