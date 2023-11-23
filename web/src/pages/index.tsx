@@ -3,7 +3,8 @@ import { PostsQuery } from "@/generated/graphql";
 import { POSTS_QUERY } from "@/graphql/queries/posts";
 import { createApolloClient } from "@/utils/createApolloClient";
 import { useQuery } from "@apollo/client";
-import { Box, Heading, Stack } from "@chakra-ui/react";
+import Link from "next/link";
+import { Box, Button, Flex, Heading, Stack } from "@chakra-ui/react";
 import Head from "next/head";
 
 export default function Home({ posts }: { posts: PostsQuery["posts"] }) {
@@ -17,7 +18,12 @@ export default function Home({ posts }: { posts: PostsQuery["posts"] }) {
       </Head>
       <Box>
         <NavBar />
-        <Heading>Welcome!</Heading>
+        <Flex direction={"row"} alignItems={"end"} gap={8} mb={4}>
+          <Heading>Welcome!</Heading>
+          <Button as={Link} href={"/create-post"}>
+            Create A Post
+          </Button>
+        </Flex>
         <Stack>
           {!posts && <div>Loading...</div>}
           {posts && posts.map((post) => <div key={post._id}>{post.title}</div>)}

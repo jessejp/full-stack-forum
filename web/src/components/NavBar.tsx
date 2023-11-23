@@ -73,7 +73,7 @@ const NavBar: React.FC<NavBarProps> = ({}) => {
   }
 
   return (
-    <Box py={4} px={6} width={"100%"} bg={"white"}>
+    <Box py={4} px={6} width={"100%"} bg={"white"} position={"sticky"} top={0} zIndex={10}>
       <Flex align="center" justify="space-between">
         <Stack direction={"row"} align="center">
           <Button as={Link} href={"/"} variant={"link"}>
