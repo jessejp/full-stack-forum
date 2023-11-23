@@ -8,10 +8,12 @@ import { Formik } from "formik";
 import type { NextPage } from "next";
 import React from "react";
 import { useRouter } from "next/router";
+import { useIsAuth } from "@/utils/useIsAuth";
 
 interface CreatePostProps {}
 
 const CreatePost: NextPage<CreatePostProps> = ({}) => {
+  useIsAuth();
   const router = useRouter();
   const [createPost] = useMutation<CreatePostMutation>(CREATE_POST);
   return (
