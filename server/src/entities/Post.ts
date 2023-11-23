@@ -6,6 +6,7 @@ import {
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from "typeorm";
 import { User } from "./User";
 
@@ -20,6 +21,15 @@ export class Post extends BaseEntity {
   @Column()
   title!: string;
 
+  @Field()
+  @Column()
+  text!: string;
+
+  @Field()
+  @Column({ type: "int", default: 0 })
+  points!: number;
+
+  @Field()
   @Column()
   creatorId: number;
 
@@ -31,6 +41,6 @@ export class Post extends BaseEntity {
   createdAt?: Date;
 
   @Field()
-  @Column({ type: "date" })
-  updatedAt?: Date = new Date();
+  @UpdateDateColumn()
+  updatedAt?: Date;
 }

@@ -33,7 +33,7 @@ const main = async () => {
     synchronize: true,
   });
 
-  PostgresDataSource.initialize();
+  await PostgresDataSource.initialize();
 
   const app = express();
 
