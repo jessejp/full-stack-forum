@@ -6,11 +6,12 @@ import { toErrorMap } from "@/utils/toErrorMap";
 import { useMutation } from "@apollo/client";
 import { Box, Flex, VStack, Heading, Button } from "@chakra-ui/react";
 import { Formik } from "formik";
-import type { GetStaticPaths, GetStaticPropsContext, NextPage } from "next";
-import router from "next/router";
+import type { NextPage } from "next";
+import { useRouter } from "next/router";
 import React from "react";
 
-const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
+const ChangePassword: NextPage = () => {
+  const router = useRouter();
   const [changePassword] = useMutation<ChangePasswordMutation>(CHANGE_PASSWORD);
   return (
     <Box h="100vh" bg="gray.100">
@@ -35,7 +36,7 @@ const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
                 const response = await changePassword({
                   variables: {
                     newPassword: values.newPassword,
-                    token,
+                    token: router.query.token as string,
                   },
                 });
                 if (response.data?.changePassword.errors) {
@@ -86,23 +87,6 @@ const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
       </Flex>
     </Box>
   );
-};
-
-export const getStaticPaths: GetStaticPaths = async () => {
-  return {
-    paths: [],
-    fallback: "blocking",
-  };
-};
-
-export const getStaticProps = async (
-  context: GetStaticPropsContext<{ token: string }>
-) => {
-  return {
-    props: {
-      token: context.params?.token,
-    },
-  };
 };
 
 export default ChangePassword;
