@@ -6,6 +6,7 @@ import {
   Entity,
   OneToMany,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from "typeorm";
 import { Post } from "./Post";
 
@@ -35,6 +36,6 @@ export class User extends BaseEntity {
   createdAt?: Date;
 
   @Field()
-  @Column({ type: "date" })
+  @UpdateDateColumn()
   updatedAt?: Date = new Date();
 }
