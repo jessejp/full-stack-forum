@@ -41,18 +41,18 @@ class UserResponse {
 @Resolver()
 export class UserResolver {
   @Query(() => User, { nullable: true })
-  async me(@Ctx() { em, req }: MyContext): Promise<User | null> {
+  me(@Ctx() { req }: MyContext) {
     if (!req.session.userId) {
       return null;
     }
-    const user = await em.findOne(User, { _id: req.session.userId });
-    return user;
+
+    return User.findOne({ where: { _id: req.session.userId } });
   }
 
   @Mutation(() => UserResponse)
   async register(
     @Arg("options") options: UserInput,
-    @Ctx() { em, req }: MyContext
+    @Ctx() { req }: MyContext
   ): Promise<UserResponse> {
     const errors: FieldError[] = [];
 
@@ -68,14 +68,14 @@ export class UserResolver {
 
     const hashedPassword = await argon2.hash(options.password);
 
-    const user = em.create(User, {
+    const user = User.create({
       username: options.username,
       email: options.email,
       password: hashedPassword,
     });
 
     try {
-      await em.persistAndFlush(user);
+      await user.save();
     } catch (err) {
       if (err.code === "23505") {
         // duplicate username error
@@ -99,7 +99,7 @@ export class UserResolver {
   async login(
     @Arg("usernameOrEmail") usernameOrEmail: string,
     @Arg("password") password: string,
-    @Ctx() { em, req }: MyContext
+    @Ctx() { req }: MyContext
   ): Promise<UserResponse> {
     if (!usernameOrEmail) {
       return {
@@ -123,10 +123,11 @@ export class UserResolver {
 
     const isEmail = EmailValidator.validate(usernameOrEmail);
 
-    const user = await em.findOne(
-      User,
-      isEmail ? { email: usernameOrEmail } : { username: usernameOrEmail }
-    );
+    const user = await User.findOne({
+      where: isEmail
+        ? { email: usernameOrEmail }
+        : { username: usernameOrEmail },
+    });
 
     const errors: FieldError[] = [];
 
@@ -160,10 +161,10 @@ export class UserResolver {
 
   @Mutation(() => Boolean)
   async forgotPassword(
-    @Ctx() { em, redis }: MyContext,
+    @Ctx() { redis }: MyContext,
     @Arg("email") email: string
   ) {
-    const user = await em.findOne(User, { email });
+    const user = await User.findOne({ where: { email } });
 
     if (!user) {
       // email is not in the db
@@ -191,7 +192,7 @@ export class UserResolver {
 
   @Mutation(() => UserResponse)
   async changePassword(
-    @Ctx() { em, redis }: MyContext,
+    @Ctx() { redis }: MyContext,
     @Arg("token") token: string,
     @Arg("newPassword") newPassword: string
   ): Promise<UserResponse> {
@@ -222,7 +223,7 @@ export class UserResolver {
       };
     }
 
-    const user = await em.findOne(User, { _id: parseInt(userId) });
+    const user = await User.findOne({ where: { _id: parseInt(userId) } });
 
     if (!user) {
       return {
@@ -234,12 +235,14 @@ export class UserResolver {
         ],
       };
     }
-    
+
+    await User.update(
+      { _id: user._id },
+      { password: await argon2.hash(newPassword) }
+    );
+
     // Delete the redis key to expire token after use
     await redis.del(key);
-
-    user.password = await argon2.hash(newPassword);
-    em.persistAndFlush(user);
 
     return { user };
   }
