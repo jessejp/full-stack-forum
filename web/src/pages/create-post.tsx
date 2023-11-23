@@ -40,15 +40,10 @@ const CreatePost: NextPage<CreatePostProps> = ({}) => {
               },
             })
               .then((res) => {
-                console.log(res);
                 router.push("/");
                 return res;
               })
               .catch((err) => {
-                console.log(err);
-                if (err.message.includes("not authenticated")) {
-                  router.push("/login");
-                }
                 return err;
               });
           }}
