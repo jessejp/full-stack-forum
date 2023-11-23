@@ -12,27 +12,9 @@ import RedisStore from "connect-redis";
 import session from "express-session";
 import { COOKIE_NAME, __prod__ } from "./constants";
 import Redis from "ioredis";
-import { DataSource } from "typeorm";
-import { User } from "./entities/User";
-import { Post } from "./entities/Post";
+import { PostgresDataSource } from "./utils/DataSource";
 
 const main = async () => {
-  const PostgresDataSource = new DataSource({
-    type: "postgres",
-    host: "localhost",
-    port: 5432,
-    username: "postgres",
-    password: "postgres",
-    database: "forum2",
-    entities: [
-      // ....
-      User,
-      Post,
-    ],
-    logging: true,
-    synchronize: true,
-  });
-
   await PostgresDataSource.initialize();
 
   const app = express();
