@@ -26,7 +26,7 @@ class PostInput {
 export class PostResolver {
   @Query(() => [Post])
   posts(
-    @Arg("limit") limit: number,
+    @Arg("limit", () => Int) limit: number,
     @Arg("cursor", () => String, { nullable: true }) cursor: string | null
   ): Promise<Post[]> {
     const realLimit = Math.min(50, limit);
@@ -35,7 +35,7 @@ export class PostResolver {
       .take(realLimit);
 
     if (cursor) {
-      qb.where("p.createdAt > :cursor", { cursor: cursor });
+      qb.where("p.createdAt < :cursor", { cursor });
     }
 
     return qb.getMany();

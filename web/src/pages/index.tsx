@@ -37,6 +37,10 @@ export async function getServerSideProps() {
   const client = createApolloClient();
   const { data } = await client.query<PostsQuery>({
     query: POSTS_QUERY,
+    variables: {
+      limit: 10,
+      cursor: null,
+    }
   });
 
   return {
