@@ -3,13 +3,16 @@ import { gql } from "@apollo/client";
 export const POSTS_QUERY = gql`
   query Posts($limit: Int!, $cursor: String) {
     posts(limit: $limit, cursor: $cursor) {
-      _id
-      title
-      textSnippet
-      creatorId
-      points
-      createdAt
-      updatedAt
+      posts {
+        _id
+        title
+        textSnippet
+        creatorId
+        points
+        createdAt
+        updatedAt
+      }
+      hasMore
     }
   }
 `;

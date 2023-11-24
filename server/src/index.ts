@@ -16,6 +16,9 @@ import { PostgresDataSource } from "./utils/DataSource";
 
 const main = async () => {
   await PostgresDataSource.initialize();
+
+  // await PostgresDataSource.runMigrations();
+
   const app = express();
 
   // Initialize client.

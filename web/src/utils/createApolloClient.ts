@@ -22,4 +22,5 @@ export const createApolloClient = () =>
     cache: new InMemoryCache(),
     credentials: "include",
     // link: from([errorLink, httpLink]),
+    ssrMode: true,
   });

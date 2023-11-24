@@ -5,8 +5,19 @@ import { createApolloClient } from "@/utils/createApolloClient";
 import Link from "next/link";
 import { Box, Button, Flex, Heading, Stack } from "@chakra-ui/react";
 import Head from "next/head";
+import { useQuery } from "@apollo/client";
 
-export default function Home({ posts }: { posts: PostsQuery["posts"] }) {
+export default function Home() {
+  const { data, loading, fetchMore } = useQuery<PostsQuery>(POSTS_QUERY, {
+    variables: {
+      limit: 15,
+      cursor: null,
+    },
+    notifyOnNetworkStatusChange: true,
+  });
+
+  const { posts, hasMore } = data?.posts || {};
+
   return (
     <>
       <Head>
@@ -24,14 +35,15 @@ export default function Home({ posts }: { posts: PostsQuery["posts"] }) {
           gap={8}
           mb={4}
         >
-          <Heading>Welcome!</Heading>
+          <Heading>Welcome to the forum!</Heading>
           <Button as={Link} href={"/create-post"}>
             Create A Post
           </Button>
         </Flex>
-        <Stack gap={8}>
-          {!posts && <div>Loading...</div>}
-          {posts &&
+        <Stack gap={8} align={"center"}>
+          {loading && <Box>Loading...</Box>}
+          {!loading && !posts && <Box>No posts found.</Box>}
+          {!!posts &&
             posts.map((post) => (
               <Box
                 key={post._id}
@@ -48,25 +60,57 @@ export default function Home({ posts }: { posts: PostsQuery["posts"] }) {
                 <Box>{post.textSnippet}</Box>
               </Box>
             ))}
+          {!!posts && hasMore && (
+            <Button
+              isLoading={loading}
+              onClick={async () => {
+                await fetchMore({
+                  variables: {
+                    limit: 15,
+                    cursor: posts[posts.length - 1].createdAt,
+                  },
+                  updateQuery: (prev, { fetchMoreResult }) => {
+                    if (!fetchMoreResult) {
+                      return prev;
+                    }
+
+                    return {
+                      __typename: "Query",
+                      posts: {
+                        __typename: "PaginatedPosts",
+                        hasMore: fetchMoreResult.posts.hasMore,
+                        posts: [
+                          ...prev.posts.posts,
+                          ...fetchMoreResult.posts.posts,
+                        ],
+                      },
+                    };
+                  },
+                });
+              }}
+            >
+              Load More
+            </Button>
+          )}
         </Stack>
       </Box>
     </>
   );
 }
 
-export async function getServerSideProps() {
-  const client = createApolloClient();
-  const { data } = await client.query<PostsQuery>({
-    query: POSTS_QUERY,
-    variables: {
-      limit: 10,
-      cursor: null,
-    },
-  });
+// export async function getServerSideProps() {
+//   const client = createApolloClient();
+//   const { data } = await client.query<PostsQuery>({
+//     query: POSTS_QUERY,
+//     variables: {
+//       limit: 10,
+//       cursor: null,
+//     },
+//   });
 
-  return {
-    props: {
-      posts: data.posts,
-    },
-  };
-}
+//   return {
+//     props: {
+//       posts: data.posts,
+//     },
+//   };
+// }
