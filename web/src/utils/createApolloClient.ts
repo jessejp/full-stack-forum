@@ -1,3 +1,4 @@
+import { PaginatedPosts } from "@/generated/graphql";
 import { ApolloClient, InMemoryCache } from "@apollo/client";
 // import { onError } from "@apollo/client/link/error";
 // import Router from "next/router";
@@ -19,8 +20,25 @@ import { ApolloClient, InMemoryCache } from "@apollo/client";
 export const createApolloClient = () =>
   new ApolloClient({
     uri: "http://localhost:4000/graphql",
-    cache: new InMemoryCache(),
+    cache: new InMemoryCache({
+      typePolicies: {
+        Query: {
+          fields: {
+            posts: {
+              keyArgs: [],
+              merge(
+                existing: PaginatedPosts | undefined,
+                incoming: PaginatedPosts
+              ): PaginatedPosts {
+                return {
+                  ...incoming,
+                  posts: [...(existing?.posts || []), ...incoming.posts],
+                };
+              },
+            },
+          },
+        },
+      },
+    }),
     credentials: "include",
-    // link: from([errorLink, httpLink]),
-    ssrMode: true,
   });

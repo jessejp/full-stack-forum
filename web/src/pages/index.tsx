@@ -69,23 +69,23 @@ export default function Home() {
                     limit: 15,
                     cursor: posts[posts.length - 1].createdAt,
                   },
-                  updateQuery: (prev, { fetchMoreResult }) => {
-                    if (!fetchMoreResult) {
-                      return prev;
-                    }
+                  // updateQuery: (prev, { fetchMoreResult }) => {
+                  //   if (!fetchMoreResult) {
+                  //     return prev;
+                  //   }
 
-                    return {
-                      __typename: "Query",
-                      posts: {
-                        __typename: "PaginatedPosts",
-                        hasMore: fetchMoreResult.posts.hasMore,
-                        posts: [
-                          ...prev.posts.posts,
-                          ...fetchMoreResult.posts.posts,
-                        ],
-                      },
-                    };
-                  },
+                  //   return {
+                  //     __typename: "Query",
+                  //     posts: {
+                  //       __typename: "PaginatedPosts",
+                  //       hasMore: fetchMoreResult.posts.hasMore,
+                  //       posts: [
+                  //         ...prev.posts.posts,
+                  //         ...fetchMoreResult.posts.posts,
+                  //       ],
+                  //     },
+                  //   };
+                  // },
                 });
               }}
             >
