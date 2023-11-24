@@ -2,12 +2,22 @@ import NavBar from "@/components/NavBar";
 import { PostsQuery } from "@/generated/graphql";
 import { POSTS_QUERY } from "@/graphql/queries/posts";
 import { createApolloClient } from "@/utils/createApolloClient";
-import { useQuery } from "@apollo/client";
 import Link from "next/link";
 import { Box, Button, Flex, Heading, Stack } from "@chakra-ui/react";
 import Head from "next/head";
+import { useQuery } from "@apollo/client";
 
-export default function Home({ posts }: { posts: PostsQuery["posts"] }) {
+export default function Home() {
+  const { data, loading, fetchMore } = useQuery<PostsQuery>(POSTS_QUERY, {
+    variables: {
+      limit: 15,
+      cursor: null,
+    },
+    notifyOnNetworkStatusChange: true,
+  });
+
+  const { posts, hasMore } = data?.posts || {};
+
   return (
     <>
       <Head>
@@ -16,32 +26,91 @@ export default function Home({ posts }: { posts: PostsQuery["posts"] }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Box>
+      <Box px={8}>
         <NavBar />
-        <Flex direction={"row"} alignItems={"end"} gap={8} mb={4}>
-          <Heading>Welcome!</Heading>
+        <Flex
+          direction={"row"}
+          alignItems={"end"}
+          justifyContent={"space-between"}
+          gap={8}
+          mb={4}
+        >
+          <Heading>Welcome to the forum!</Heading>
           <Button as={Link} href={"/create-post"}>
             Create A Post
           </Button>
         </Flex>
-        <Stack>
-          {!posts && <div>Loading...</div>}
-          {posts && posts.map((post) => <div key={post._id}>{post.title}</div>)}
+        <Stack gap={8} align={"center"}>
+          {loading && <Box>Loading...</Box>}
+          {!loading && !posts && <Box>No posts found.</Box>}
+          {!!posts &&
+            posts.map((post) => (
+              <Box
+                key={post._id}
+                minW={128 * 2}
+                maxW={128 * 8}
+                w={"100%"}
+                shadow={"md"}
+                p={4}
+                borderRadius={4}
+              >
+                <Heading size={"md"} mb={2}>
+                  {post.title}
+                </Heading>
+                <Box>{post.textSnippet}</Box>
+              </Box>
+            ))}
+          {!!posts && hasMore && (
+            <Button
+              isLoading={loading}
+              onClick={async () => {
+                await fetchMore({
+                  variables: {
+                    limit: 15,
+                    cursor: posts[posts.length - 1].createdAt,
+                  },
+                  // updateQuery: (prev, { fetchMoreResult }) => {
+                  //   if (!fetchMoreResult) {
+                  //     return prev;
+                  //   }
+
+                  //   return {
+                  //     __typename: "Query",
+                  //     posts: {
+                  //       __typename: "PaginatedPosts",
+                  //       hasMore: fetchMoreResult.posts.hasMore,
+                  //       posts: [
+                  //         ...prev.posts.posts,
+                  //         ...fetchMoreResult.posts.posts,
+                  //       ],
+                  //     },
+                  //   };
+                  // },
+                });
+              }}
+            >
+              Load More
+            </Button>
+          )}
         </Stack>
       </Box>
     </>
   );
 }
 
-export async function getServerSideProps() {
-  const client = createApolloClient();
-  const { data } = await client.query<PostsQuery>({
-    query: POSTS_QUERY,
-  });
+// export async function getServerSideProps() {
+//   const client = createApolloClient();
+//   const { data } = await client.query<PostsQuery>({
+//     query: POSTS_QUERY,
+//     variables: {
+//       limit: 10,
+//       cursor: null,
+//     },
+//   });
 
-  return {
-    props: {
-      posts: data.posts,
-    },
-  };
-}
+//   return {
+//     props: {
+//       posts: data.posts,
+//     },
+//   };
+// }

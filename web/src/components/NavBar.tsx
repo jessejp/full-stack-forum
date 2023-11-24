@@ -20,68 +20,73 @@ const NavBar: React.FC<NavBarProps> = ({}) => {
     skip: isServer(),
   });
 
-  let authButtons;
-
-  if (loading || !data?.me) {
-    authButtons = (
-      <>
-        <Button
-          as={Link}
-          fontSize={"sm"}
-          fontWeight={400}
-          variant={"link"}
-          href="/login"
-        >
-          Login
-        </Button>
-        <Button
-          as={Link}
-          href="/register"
-          fontSize={"sm"}
-          fontWeight={600}
-          color={"white"}
-          bg={"purple.500"}
-          _hover={{
-            bg: "purple.300",
-          }}
-        >
-          Register
-        </Button>
-      </>
-    );
-  } else {
-    authButtons = (
-      <Flex wrap={"wrap"} align={"center"} gap={4}>
-        <Stack direction={"row"}>
-          <Text>Signed in as: </Text>
-          <Text fontWeight={600} color={"purple"}>
-            {data?.me?.username}
-          </Text>
-        </Stack>
-        <Button
-          isLoading={logoutFetching}
-          onClick={async () => {
-            await logout();
-            router.reload();
-            // await apolloClient.clearStore();
-          }}
-        >
-          Logout
-        </Button>
-      </Flex>
-    );
-  }
-
   return (
-    <Box py={4} px={6} width={"100%"} bg={"white"} position={"sticky"} top={0} zIndex={10}>
-      <Flex align="center" justify="space-between">
+    <Box
+      py={4}
+      width={"100%"}
+      bg={"white"}
+      position={"sticky"}
+      top={0}
+      zIndex={10}
+    >
+      <Flex
+        align="center"
+        justify="space-between"
+        wrap={"wrap-reverse"}
+        gap={4}
+      >
         <Stack direction={"row"} align="center">
           <Button as={Link} href={"/"} variant={"link"}>
             Home
           </Button>
         </Stack>
         <Stack direction={"row"} align="center" gap={"4"}>
-          {authButtons}
+          {(loading || !data?.me) && (
+            <>
+              <Button
+                as={Link}
+                fontSize={"sm"}
+                fontWeight={400}
+                variant={"link"}
+                href="/login"
+              >
+                Login
+              </Button>
+              <Button
+                as={Link}
+                href="/register"
+                fontSize={"sm"}
+                fontWeight={600}
+                color={"white"}
+                bg={"purple.500"}
+                _hover={{
+                  bg: "purple.300",
+                }}
+              >
+                Register
+              </Button>
+            </>
+          )}
+          {data?.me && (
+            <Flex wrap={"wrap"} align={"center"} gap={4}>
+              <Stack direction={"row"} wrap={"wrap"}>
+                <Text>Signed in as: </Text>
+                <Text fontWeight={600} color={"purple"}>
+                  {data?.me?.username}
+                </Text>
+              </Stack>
+              <Button
+                isLoading={logoutFetching}
+                onClick={async () => {
+                  await logout();
+                  router.reload();
+                  // await apolloClient.clearStore();
+                }}
+              >
+                Logout
+              </Button>
+            </Flex>
+          )}
         </Stack>
       </Flex>
     </Box>
