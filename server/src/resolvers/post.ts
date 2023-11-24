@@ -48,15 +48,28 @@ export class PostResolver {
     const realLimit = Math.min(50, limit);
     const tommiStrat = realLimit + 1;
 
-    const qb = PostgresDataSource.createQueryBuilder(Post, "p")
-      .orderBy("p.createdAt", "DESC")
-      .take(tommiStrat);
+    const replacements: any[] = [tommiStrat];
 
     if (cursor) {
-      qb.where("p.createdAt < :cursor", { cursor });
+      replacements.push(cursor);
     }
 
-    const posts = await qb.getMany();
+    const posts = await PostgresDataSource.query(
+      `
+      SELECT p.*,
+      json_build_object(
+        '_id', u._id,
+        'username', u.username,
+        'email', u.email
+      ) creator
+      FROM post p
+      INNER JOIN public.user u ON u._id = p."creatorId"
+      ${cursor ? `WHERE p."createdAt" < $2` : ""}
+      ORDER BY p."createdAt" DESC
+      LIMIT $1
+    `,
+      replacements
+    );
 
     return {
       posts: posts.slice(0, realLimit),
