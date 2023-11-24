@@ -5,7 +5,7 @@ export const POSTS_QUERY = gql`
     posts(limit: $limit, cursor: $cursor) {
       _id
       title
-      text
+      textSnippet
       creatorId
       points
       createdAt

@@ -52,7 +52,7 @@ const NavBar: React.FC<NavBarProps> = ({}) => {
   } else {
     authButtons = (
       <Flex wrap={"wrap"} align={"center"} gap={4}>
-        <Stack direction={"row"}>
+        <Stack direction={"row"} wrap={"wrap"}>
           <Text>Signed in as: </Text>
           <Text fontWeight={600} color={"purple"}>
             {data?.me?.username}
@@ -73,8 +73,20 @@ const NavBar: React.FC<NavBarProps> = ({}) => {
   }
 
   return (
-    <Box py={4} px={6} width={"100%"} bg={"white"} position={"sticky"} top={0} zIndex={10}>
-      <Flex align="center" justify="space-between">
+    <Box
+      py={4}
+      width={"100%"}
+      bg={"white"}
+      position={"sticky"}
+      top={0}
+      zIndex={10}
+    >
+      <Flex
+        align="center"
+        justify="space-between"
+        wrap={"wrap-reverse"}
+        gap={4}
+      >
         <Stack direction={"row"} align="center">
           <Button as={Link} href={"/"} variant={"link"}>
             Home
