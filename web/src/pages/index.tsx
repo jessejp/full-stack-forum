@@ -1,7 +1,7 @@
 import NavBar from "@/components/NavBar";
 import { PostsQuery } from "@/generated/graphql";
 import { POSTS_QUERY } from "@/graphql/queries/posts";
-import { createApolloClient } from "@/utils/createApolloClient";
+// import { createApolloClient } from "@/utils/createApolloClient";
 import Link from "next/link";
 import { Box, Button, Flex, Heading, Stack } from "@chakra-ui/react";
 import Head from "next/head";
@@ -45,7 +45,9 @@ export default function Home() {
           {!loading && !posts && <Box>No posts found.</Box>}
           {!!posts &&
             posts.map((post) => (
-              <Box
+              <Flex
+                direction={"column"}
+                gap={2}
                 key={post._id}
                 minW={128 * 2}
                 maxW={128 * 8}
@@ -54,11 +56,12 @@ export default function Home() {
                 p={4}
                 borderRadius={4}
               >
-                <Heading size={"md"} mb={2}>
-                  {post.title}
-                </Heading>
+                <Heading size={"md"}>{post.title}</Heading>
                 <Box>{post.textSnippet}</Box>
-              </Box>
+                <Box color={"purple"} fontSize={"small"}>
+                  posted by {post.creator.username}
+                </Box>
+              </Flex>
             ))}
           {!!posts && hasMore && (
             <Button

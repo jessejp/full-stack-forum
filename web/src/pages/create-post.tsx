@@ -34,11 +34,14 @@ const CreatePost: NextPage<CreatePostProps> = ({}) => {
               return;
             }
 
-            const response = await createPost({
+            await createPost({
               variables: {
                 input: {
                   ...values,
                 },
+              },
+              update: (cache) => {
+                cache.evict({ fieldName: "posts" });
               },
             })
               .then((res) => {

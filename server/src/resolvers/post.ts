@@ -16,7 +16,6 @@ import {
 } from "type-graphql";
 import { isAuth } from "../middleware/isAuth";
 import { PostgresDataSource } from "../utils/DataSource";
-import { Vote } from "../entities/Vote";
 
 @InputType()
 class PostInput {
