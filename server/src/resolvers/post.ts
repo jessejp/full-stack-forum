@@ -16,6 +16,7 @@ import {
 } from "type-graphql";
 import { isAuth } from "../middleware/isAuth";
 import { PostgresDataSource } from "../utils/DataSource";
+import { Vote } from "../entities/Vote";
 
 @InputType()
 class PostInput {
@@ -117,5 +118,33 @@ export class PostResolver {
     } catch {
       return false;
     }
+  }
+
+  @Mutation(() => Boolean)
+  @UseMiddleware(isAuth)
+  vote(
+    @Arg("postId", () => Int) postId: number,
+    @Arg("value", () => Int) value: number,
+    @Ctx() { req }: MyContext
+  ) {
+    const isUpvote = value !== -1;
+    const realValue = isUpvote ? 1 : -1;
+
+    const { userId } = req.session;
+
+    PostgresDataSource.query(`
+      BEGIN TRANSACTION;
+
+      INSERT INTO vote("userId", "postId", value)
+      VALUES (${userId}, ${postId}, ${realValue});
+
+      UPDATE post
+      SET points = points + ${realValue}
+      WHERE _id = ${postId};
+
+      COMMIT TRANSACTION;
+      `);
+
+    return true;
   }
 }

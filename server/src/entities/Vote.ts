@@ -14,7 +14,7 @@ export class Vote extends BaseEntity {
   @PrimaryColumn()
   userId: number;
 
-  @Field()
+  @Field(() => User)
   @ManyToOne(() => User, (user) => user.votes)
   user: User;
 
@@ -22,7 +22,7 @@ export class Vote extends BaseEntity {
   @PrimaryColumn()
   postId: number;
 
-  @Field()
+  @Field(() => Post)
   @ManyToOne(() => Post, (post) => post.votes)
   post: Post;
 }
