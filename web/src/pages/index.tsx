@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Box, Button, Flex, Heading, Stack } from "@chakra-ui/react";
 import Head from "next/head";
 import { useQuery } from "@apollo/client";
+import PostItem from "@/components/PostItem";
 
 export default function Home() {
   const { data, loading, fetchMore } = useQuery<PostsQuery>(POSTS_QUERY, {
@@ -43,26 +44,7 @@ export default function Home() {
         <Stack gap={8} align={"center"}>
           {loading && <Box>Loading...</Box>}
           {!loading && !posts && <Box>No posts found.</Box>}
-          {!!posts &&
-            posts.map((post) => (
-              <Flex
-                direction={"column"}
-                gap={2}
-                key={post._id}
-                minW={128 * 2}
-                maxW={128 * 8}
-                w={"100%"}
-                shadow={"md"}
-                p={4}
-                borderRadius={4}
-              >
-                <Heading size={"md"}>{post.title}</Heading>
-                <Box>{post.textSnippet}</Box>
-                <Box color={"purple"} fontSize={"small"}>
-                  posted by {post.creator.username}
-                </Box>
-              </Flex>
-            ))}
+          {!!posts && posts.map((post) => <PostItem key={post._id} post={post} />)}
           {!!posts && hasMore && (
             <Button
               isLoading={loading}

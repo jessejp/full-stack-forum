@@ -16,6 +16,7 @@ import {
 } from "type-graphql";
 import { isAuth } from "../middleware/isAuth";
 import { PostgresDataSource } from "../utils/DataSource";
+import { Vote } from "../entities/Vote";
 
 @InputType()
 class PostInput {
@@ -121,28 +122,59 @@ export class PostResolver {
 
   @Mutation(() => Boolean)
   @UseMiddleware(isAuth)
-  vote(
+  async vote(
     @Arg("postId", () => Int) postId: number,
     @Arg("value", () => Int) value: number,
     @Ctx() { req }: MyContext
   ) {
     const isUpvote = value !== -1;
     const realValue = isUpvote ? 1 : -1;
-
     const { userId } = req.session;
 
-    PostgresDataSource.query(`
-      BEGIN TRANSACTION;
+    const isVoted = await Vote.findOne({ where: { postId, userId } });
 
-      INSERT INTO vote("userId", "postId", value)
-      VALUES (${userId}, ${postId}, ${realValue});
+    if (isVoted && isVoted.value !== realValue) {
+      // user is changing their vote
+      PostgresDataSource.transaction(async (manager) => {
+        await manager.query(
+          `
+        UPDATE vote
+        SET value = $1
+        WHERE "userId" = $2 AND "postId" = $3;
+        `,
+          [realValue, userId, postId]
+        );
 
-      UPDATE post
-      SET points = points + ${realValue}
-      WHERE _id = ${postId};
+        await manager.query(
+          `
+        UPDATE post
+        SET points = points + $1
+        WHERE "_id" = $2;
+        `,
+          [realValue * 2, postId]
+        );
+      });
+    } else if (!isVoted) {
+      // use has not voted before
+      PostgresDataSource.transaction(async (manager) => {
+        await manager.query(
+          `
+          INSERT INTO vote("userId", "postId", value)
+          VALUES ($1, $2, $3);
+          `,
+          [userId, postId, realValue]
+        );
 
-      COMMIT TRANSACTION;
-      `);
+        await manager.query(
+          `
+          UPDATE post
+          SET points = points + $1
+          WHERE _id = $2;
+          `,
+          [realValue, postId]
+        );
+      });
+    }
 
     return true;
   }
