@@ -2,7 +2,7 @@ import { PostsQuery, VoteMutation } from "@/generated/graphql";
 import { Flex, Heading, Box, IconButton } from "@chakra-ui/react";
 import { TriangleDownIcon, TriangleUpIcon } from "@chakra-ui/icons";
 import React from "react";
-import { useMutation } from "@apollo/client";
+import { gql, useMutation } from "@apollo/client";
 import { VOTE_MUTATION } from "@/graphql/mutations/vote";
 
 interface PostItemProps {
@@ -10,7 +10,53 @@ interface PostItemProps {
 }
 
 const PostItem: React.FC<PostItemProps> = ({ post }) => {
-  const [voteMutation, { loading }] = useMutation<VoteMutation>(VOTE_MUTATION);
+  const [voteMutation, { data, loading }] =
+    useMutation<VoteMutation>(VOTE_MUTATION);
+
+  const handleVote: (voteValue: 1 | -1) => void = async (voteValue) => {
+    if (post.voteStatus === voteValue) return;
+
+    await voteMutation({
+      variables: {
+        postId: post._id,
+        value: voteValue,
+      },
+      update: (cache) => {
+        const data = cache.readFragment<{
+          _id: string;
+          points: number;
+          voteStatus: number | null;
+        }>({
+          id: "Post:" + post._id,
+          fragment: gql`
+            fragment _ on Post {
+              _id
+              points
+              voteStatus
+            }
+          `,
+        });
+
+        if (!data || data.voteStatus === voteValue) return;
+
+        const newPoints = data.points + (!data.voteStatus ? 1 : 2) * voteValue;
+        cache.writeFragment({
+          id: "Post:" + post._id,
+          fragment: gql`
+            fragment __ on Post {
+              points
+              voteStatus
+            }
+          `,
+          data: {
+            points: newPoints,
+            voteStatus: voteValue,
+          },
+        });
+      },
+    });
+  };
+
   return (
     <Flex
       direction={"row"}
@@ -31,16 +77,8 @@ const PostItem: React.FC<PostItemProps> = ({ post }) => {
           aria-label="Like Post"
           icon={<TriangleUpIcon />}
           _hover={{ background: "green.400", color: "black" }}
-          onClick={async () => {
-            await voteMutation({
-              variables: {
-                postId: post._id,
-                value: 1,
-              },
-              update: (cache) => {
-                // cache.evict({ fieldName: "posts" });
-              },
-            });
+          onClick={() => {
+            handleVote(1);
           }}
         />
         <Box textAlign={"center"}>{post.points}</Box>
@@ -51,16 +89,8 @@ const PostItem: React.FC<PostItemProps> = ({ post }) => {
           aria-label="Dislike Post"
           icon={<TriangleDownIcon />}
           _hover={{ background: "red.400", color: "black" }}
-          onClick={async () => {
-            await voteMutation({
-              variables: {
-                postId: post._id,
-                value: -1,
-              },
-              update: (cache) => {
-                // cache.evict({ fieldName: "posts" });
-              },
-            });
+          onClick={() => {
+            handleVote(-1);
           }}
         />
       </Flex>
