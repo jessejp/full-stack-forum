@@ -25,11 +25,12 @@ const PostItem: React.FC<PostItemProps> = ({ post }) => {
     >
       <Flex direction={"column"} gap={1}>
         <IconButton
+          bg={post.voteStatus === 1 ? "green.500" : "initial"}
           isDisabled={loading}
           size={"sm"}
           aria-label="Like Post"
           icon={<TriangleUpIcon />}
-          _hover={{ background: "green.400" }}
+          _hover={{ background: "green.400", color: "black" }}
           onClick={async () => {
             await voteMutation({
               variables: {
@@ -44,11 +45,12 @@ const PostItem: React.FC<PostItemProps> = ({ post }) => {
         />
         <Box textAlign={"center"}>{post.points}</Box>
         <IconButton
+          bg={post.voteStatus === -1 ? "red.500" : "initial"}
           isDisabled={loading}
           size={"sm"}
           aria-label="Dislike Post"
           icon={<TriangleDownIcon />}
-          _hover={{ background: "red.400" }}
+          _hover={{ background: "red.400", color: "black" }}
           onClick={async () => {
             await voteMutation({
               variables: {

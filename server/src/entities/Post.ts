@@ -30,6 +30,9 @@ export class Post extends BaseEntity {
   @Field()
   @Column({ type: "int", default: 0 })
   points!: number;
+  
+  @Field(() => Int, { nullable: true })
+  voteStatus: number;
 
   @Field()
   @Column()

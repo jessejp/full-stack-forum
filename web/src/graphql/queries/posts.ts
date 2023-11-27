@@ -12,6 +12,7 @@ export const POSTS_QUERY = gql`
         points
         createdAt
         updatedAt
+        voteStatus
         creator {
           _id
           username
