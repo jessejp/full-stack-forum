@@ -51,10 +51,17 @@ export class PostResolver {
     const tommiStrat = realLimit + 1;
     const userId = req.session.userId;
 
-    const replacements: any[] = [tommiStrat, userId];
+    const replacements: any[] = [tommiStrat];
 
+    if (userId) {
+      replacements.push(userId);
+    }
+
+    let cursorIdx: number | null = null;
+    
     if (cursor) {
       replacements.push(cursor);
+      cursorIdx = replacements.length;
     }
 
     const posts = await PostgresDataSource.query(
@@ -72,7 +79,7 @@ export class PostResolver {
       }
       FROM post p
       INNER JOIN public.user u ON u._id = p."creatorId"
-      ${cursor ? `WHERE p."createdAt" < $3` : ""}
+      ${cursor ? `WHERE p."createdAt" < $${cursorIdx}` : ""}
       ORDER BY p."createdAt" DESC
       LIMIT $1
     `,
