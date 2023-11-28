@@ -124,11 +124,9 @@ export class PostResolver {
     `,
       replacements
     );
-
     if (!post || !post.length) {
       return null;
     }
-
     return post[0];
   }
 
@@ -159,14 +157,23 @@ export class PostResolver {
     return post;
   }
 
+  @UseMiddleware(isAuth)
   @Mutation(() => Boolean)
-  async deletePost(@Arg("_id") _id: number): Promise<boolean> {
-    try {
-      await Post.delete({ _id });
-      return true;
-    } catch {
+  async deletePost(
+    @Arg("_id", () => Int) _id: number,
+    @Ctx() { req }: MyContext
+  ): Promise<boolean> {
+    const post = await Post.findOne({ where: { _id } });
+    if (!post) {
       return false;
     }
+    if (post.creatorId !== req.session.userId) {
+      throw new Error("not authorized");
+    }
+
+    await Vote.delete({ postId: _id });
+    await Post.delete({ _id, creatorId: req.session.userId });
+    return true;
   }
 
   @Mutation(() => Boolean)

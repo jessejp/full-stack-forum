@@ -1,15 +1,17 @@
 import {
+  DeletePostMutation,
   PostFragmentFieldsFragment,
   PostsQuery,
   ReadPostQuery,
   VoteMutation,
 } from "@/generated/graphql";
 import { Flex, Heading, Box, IconButton } from "@chakra-ui/react";
-import { TriangleDownIcon, TriangleUpIcon } from "@chakra-ui/icons";
+import { DeleteIcon, TriangleDownIcon, TriangleUpIcon } from "@chakra-ui/icons";
 import React from "react";
 import { gql, useMutation } from "@apollo/client";
 import { VOTE_MUTATION } from "@/graphql/mutations/vote";
 import Link from "next/link";
+import { DELETE_POST } from "@/graphql/mutations/deletePost";
 
 interface PostItemProps {
   post: PostFragmentFieldsFragment & {
@@ -20,8 +22,9 @@ interface PostItemProps {
 
 const PostItem: React.FC<PostItemProps> = ({ post }) => {
   const isFullPost = !!post.text;
-  const [voteMutation, { loading }] =
-    useMutation<VoteMutation>(VOTE_MUTATION);
+  const [voteMutation, { loading }] = useMutation<VoteMutation>(VOTE_MUTATION);
+
+  const [deleteMutation] = useMutation<DeletePostMutation>(DELETE_POST);
 
   const handleVote: (voteValue: 1 | -1) => void = async (voteValue) => {
     if (post.voteStatus === voteValue) return;
@@ -77,7 +80,7 @@ const PostItem: React.FC<PostItemProps> = ({ post }) => {
       p={4}
       borderRadius={4}
       gap={4}
-      align={"center"}
+      align={"start"}
     >
       <Flex direction={"column"} gap={1}>
         <IconButton
@@ -104,7 +107,7 @@ const PostItem: React.FC<PostItemProps> = ({ post }) => {
           }}
         />
       </Flex>
-      <Flex direction={"column"} gap={2}>
+      <Flex direction={"column"} gap={2} w={"full"}>
         <Heading
           as={!isFullPost ? Link : undefined}
           href={`/post/${post._id}`}
@@ -123,6 +126,22 @@ const PostItem: React.FC<PostItemProps> = ({ post }) => {
         <Box color={"purple"} fontSize={"small"}>
           posted by {post.creator.username}
         </Box>
+      </Flex>
+      <Flex>
+        <IconButton
+          aria-label="delete post"
+          icon={<DeleteIcon />}
+          onClick={async () => {
+            await deleteMutation({
+              variables: {
+                id: post._id,
+              },
+              update: (cache) => {
+                
+              },
+            });
+          }}
+        />
       </Flex>
     </Flex>
   );
