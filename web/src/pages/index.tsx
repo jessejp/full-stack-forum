@@ -32,7 +32,7 @@ export default function Home() {
           Create A Post
         </Button>
       </Flex>
-      <Stack gap={8} align={"center"}>
+      <Stack gap={8}>
         {loading && <Box>Loading...</Box>}
         {!loading && !posts && <Box>No posts found.</Box>}
         {!!posts &&

@@ -13,6 +13,7 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Therefore it is highly recommended to use the babel or swc plugin for production.
  */
 const documents = {
+    "\n  fragment PostFragmentFields on Post {\n    _id\n    title\n    points\n    createdAt\n    voteStatus\n    creator {\n      username\n    }\n  }\n": types.PostFragmentFieldsFragmentDoc,
     "\n  mutation ChangePassword($newPassword: String!, $token: String!) {\n    changePassword(newPassword: $newPassword, token: $token) {\n      errors {\n        field\n        message\n      }\n      user {\n        _id\n        email\n        username\n        createdAt\n        updatedAt\n      }\n    }\n  }\n": types.ChangePasswordDocument,
     "\n  mutation createPost($input: PostInput!) {\n    createPost(input: $input) {\n      _id\n      createdAt\n      points\n      title\n      text\n      creatorId\n    }\n  }\n": types.CreatePostDocument,
     "\n  mutation ForgotPassword($email: String!) {\n    forgotPassword(email: $email)\n  }\n": types.ForgotPasswordDocument,
@@ -21,8 +22,8 @@ const documents = {
     "\n  mutation Register($options: UserInput!) {\n    register(options: $options) {\n      errors {\n        field\n        message\n      }\n      user {\n        _id\n        createdAt\n        username\n        email\n      }\n    }\n  }\n": types.RegisterDocument,
     "\n  mutation Vote($value: Int!, $postId: Int!) {\n    vote(value: $value, postId: $postId)\n  }\n": types.VoteDocument,
     "\n  query Me {\n    me {\n      _id\n      username\n    }\n  }\n": types.MeDocument,
-    "\n  query Posts($limit: Int!, $cursor: String) {\n    posts(limit: $limit, cursor: $cursor) {\n      hasMore\n      posts {\n        _id\n        title\n        textSnippet\n        creatorId\n        points\n        createdAt\n        updatedAt\n        voteStatus\n        creator {\n          _id\n          username\n        }\n      }\n    }\n  }\n": types.PostsDocument,
-    "\n  query readPost($id: Int!) {\n    readPost(_id: $id) {\n      _id\n      createdAt\n      points\n      title\n      text\n      creator {\n        username\n      }\n    }\n  }\n": types.ReadPostDocument,
+    "\n  \n  query Posts($limit: Int!, $cursor: String) {\n    posts(limit: $limit, cursor: $cursor) {\n      hasMore\n      posts {\n        textSnippet\n        ...PostFragmentFields\n      }\n    }\n  }\n": types.PostsDocument,
+    "\n  \n  query readPost($id: Int!) {\n    readPost(_id: $id) {\n      text\n      ...PostFragmentFields\n    }\n  }\n": types.ReadPostDocument,
 };
 
 /**
@@ -39,6 +40,10 @@ const documents = {
  */
 export function graphql(source: string): unknown;
 
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment PostFragmentFields on Post {\n    _id\n    title\n    points\n    createdAt\n    voteStatus\n    creator {\n      username\n    }\n  }\n"): (typeof documents)["\n  fragment PostFragmentFields on Post {\n    _id\n    title\n    points\n    createdAt\n    voteStatus\n    creator {\n      username\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -74,11 +79,11 @@ export function graphql(source: "\n  query Me {\n    me {\n      _id\n      user
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query Posts($limit: Int!, $cursor: String) {\n    posts(limit: $limit, cursor: $cursor) {\n      hasMore\n      posts {\n        _id\n        title\n        textSnippet\n        creatorId\n        points\n        createdAt\n        updatedAt\n        voteStatus\n        creator {\n          _id\n          username\n        }\n      }\n    }\n  }\n"): (typeof documents)["\n  query Posts($limit: Int!, $cursor: String) {\n    posts(limit: $limit, cursor: $cursor) {\n      hasMore\n      posts {\n        _id\n        title\n        textSnippet\n        creatorId\n        points\n        createdAt\n        updatedAt\n        voteStatus\n        creator {\n          _id\n          username\n        }\n      }\n    }\n  }\n"];
+export function graphql(source: "\n  \n  query Posts($limit: Int!, $cursor: String) {\n    posts(limit: $limit, cursor: $cursor) {\n      hasMore\n      posts {\n        textSnippet\n        ...PostFragmentFields\n      }\n    }\n  }\n"): (typeof documents)["\n  \n  query Posts($limit: Int!, $cursor: String) {\n    posts(limit: $limit, cursor: $cursor) {\n      hasMore\n      posts {\n        textSnippet\n        ...PostFragmentFields\n      }\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query readPost($id: Int!) {\n    readPost(_id: $id) {\n      _id\n      createdAt\n      points\n      title\n      text\n      creator {\n        username\n      }\n    }\n  }\n"): (typeof documents)["\n  query readPost($id: Int!) {\n    readPost(_id: $id) {\n      _id\n      createdAt\n      points\n      title\n      text\n      creator {\n        username\n      }\n    }\n  }\n"];
+export function graphql(source: "\n  \n  query readPost($id: Int!) {\n    readPost(_id: $id) {\n      text\n      ...PostFragmentFields\n    }\n  }\n"): (typeof documents)["\n  \n  query readPost($id: Int!) {\n    readPost(_id: $id) {\n      text\n      ...PostFragmentFields\n    }\n  }\n"];
 
 export function graphql(source: string) {
   return (documents as any)[source] ?? {};

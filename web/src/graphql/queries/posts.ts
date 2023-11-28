@@ -1,22 +1,14 @@
 import { gql } from "@apollo/client";
+import { POST_FRAGMENT } from "../fragments/postFragment";
 
 export const POSTS_QUERY = gql`
+  ${POST_FRAGMENT}
   query Posts($limit: Int!, $cursor: String) {
     posts(limit: $limit, cursor: $cursor) {
       hasMore
       posts {
-        _id
-        title
         textSnippet
-        creatorId
-        points
-        createdAt
-        updatedAt
-        voteStatus
-        creator {
-          _id
-          username
-        }
+        ...PostFragmentFields
       }
     }
   }

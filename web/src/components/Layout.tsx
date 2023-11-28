@@ -1,4 +1,4 @@
-import { Box } from "@chakra-ui/react";
+import { Box, Stack } from "@chakra-ui/react";
 import Head from "next/head";
 import React, { PropsWithChildren } from "react";
 import NavBar from "./NavBar";
@@ -16,7 +16,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </Head>
       <Box px={8}>
         <NavBar />
-        {children}
+        <Stack align={"center"}>{children}</Stack>
       </Box>
     </>
   );

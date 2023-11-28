@@ -1,16 +1,26 @@
-import { PostsQuery, VoteMutation } from "@/generated/graphql";
+import {
+  PostFragmentFieldsFragment,
+  PostsQuery,
+  ReadPostQuery,
+  VoteMutation,
+} from "@/generated/graphql";
 import { Flex, Heading, Box, IconButton } from "@chakra-ui/react";
 import { TriangleDownIcon, TriangleUpIcon } from "@chakra-ui/icons";
 import React from "react";
 import { gql, useMutation } from "@apollo/client";
 import { VOTE_MUTATION } from "@/graphql/mutations/vote";
+import Link from "next/link";
 
 interface PostItemProps {
-  post: PostsQuery["posts"]["posts"][0];
+  post: PostFragmentFieldsFragment & {
+    textSnippet?: string | undefined;
+    text?: string | undefined;
+  };
 }
 
 const PostItem: React.FC<PostItemProps> = ({ post }) => {
-  const [voteMutation, { data, loading }] =
+  const isFullPost = !!post.text;
+  const [voteMutation, { loading }] =
     useMutation<VoteMutation>(VOTE_MUTATION);
 
   const handleVote: (voteValue: 1 | -1) => void = async (voteValue) => {
@@ -95,8 +105,21 @@ const PostItem: React.FC<PostItemProps> = ({ post }) => {
         />
       </Flex>
       <Flex direction={"column"} gap={2}>
-        <Heading size={"md"}>{post.title}</Heading>
-        <Box>{post.textSnippet}</Box>
+        <Heading
+          as={!isFullPost ? Link : undefined}
+          href={`/post/${post._id}`}
+          size={"md"}
+          color={!isFullPost ? "blue.600" : undefined}
+          _hover={
+            !isFullPost
+              ? { textDecor: "underline", color: "blue.400" }
+              : undefined
+          }
+          _visited={!isFullPost ? { color: "purple.500" } : undefined}
+        >
+          {post.title}
+        </Heading>
+        <Box>{isFullPost ? post.text : `${post.textSnippet}...`}</Box>
         <Box color={"purple"} fontSize={"small"}>
           posted by {post.creator.username}
         </Box>
