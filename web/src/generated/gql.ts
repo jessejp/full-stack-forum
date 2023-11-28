@@ -22,6 +22,7 @@ const documents = {
     "\n  mutation Vote($value: Int!, $postId: Int!) {\n    vote(value: $value, postId: $postId)\n  }\n": types.VoteDocument,
     "\n  query Me {\n    me {\n      _id\n      username\n    }\n  }\n": types.MeDocument,
     "\n  query Posts($limit: Int!, $cursor: String) {\n    posts(limit: $limit, cursor: $cursor) {\n      hasMore\n      posts {\n        _id\n        title\n        textSnippet\n        creatorId\n        points\n        createdAt\n        updatedAt\n        voteStatus\n        creator {\n          _id\n          username\n        }\n      }\n    }\n  }\n": types.PostsDocument,
+    "\n  query readPost($id: Int!) {\n    readPost(_id: $id) {\n      _id\n      createdAt\n      points\n      title\n      text\n      creator {\n        username\n      }\n    }\n  }\n": types.ReadPostDocument,
 };
 
 /**
@@ -74,6 +75,10 @@ export function graphql(source: "\n  query Me {\n    me {\n      _id\n      user
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  query Posts($limit: Int!, $cursor: String) {\n    posts(limit: $limit, cursor: $cursor) {\n      hasMore\n      posts {\n        _id\n        title\n        textSnippet\n        creatorId\n        points\n        createdAt\n        updatedAt\n        voteStatus\n        creator {\n          _id\n          username\n        }\n      }\n    }\n  }\n"): (typeof documents)["\n  query Posts($limit: Int!, $cursor: String) {\n    posts(limit: $limit, cursor: $cursor) {\n      hasMore\n      posts {\n        _id\n        title\n        textSnippet\n        creatorId\n        points\n        createdAt\n        updatedAt\n        voteStatus\n        creator {\n          _id\n          username\n        }\n      }\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query readPost($id: Int!) {\n    readPost(_id: $id) {\n      _id\n      createdAt\n      points\n      title\n      text\n      creator {\n        username\n      }\n    }\n  }\n"): (typeof documents)["\n  query readPost($id: Int!) {\n    readPost(_id: $id) {\n      _id\n      createdAt\n      points\n      title\n      text\n      creator {\n        username\n      }\n    }\n  }\n"];
 
 export function graphql(source: string) {
   return (documents as any)[source] ?? {};

@@ -58,7 +58,7 @@ export class PostResolver {
     }
 
     let cursorIdx: number | null = null;
-    
+
     if (cursor) {
       replacements.push(cursor);
       cursorIdx = replacements.length;
@@ -93,8 +93,27 @@ export class PostResolver {
   }
 
   @Query(() => Post, { nullable: true })
-  readPost(@Arg("_id", () => Int) _id: number): Promise<Post | null> {
-    return Post.findOne({ where: { _id } });
+  async readPost(@Arg("_id", () => Int) _id: number): Promise<Post | null> {
+    const post: [Post] | null = await PostgresDataSource.query(
+      `
+      SELECT p.*,
+      json_build_object(
+        '_id', u._id,
+        'username', u.username,
+        'email', u.email
+      ) creator
+      FROM post p
+      INNER JOIN public.user u ON u._id = p."creatorId"
+      WHERE p._id = $1
+    `,
+      [_id]
+    );
+
+    if (!post || !post.length) {
+      return null;
+    }
+
+    return post[0];
   }
 
   @Mutation(() => Post)

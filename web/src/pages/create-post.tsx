@@ -9,6 +9,7 @@ import type { NextPage } from "next";
 import React from "react";
 import { useRouter } from "next/router";
 import { useIsAuth } from "@/utils/useIsAuth";
+import Layout from "@/components/Layout";
 
 interface CreatePostProps {}
 
@@ -17,8 +18,7 @@ const CreatePost: NextPage<CreatePostProps> = ({}) => {
   const router = useRouter();
   const [createPost] = useMutation<CreatePostMutation>(CREATE_POST);
   return (
-    <Box>
-      <NavBar />
+    <Layout>
       <Flex align="center" justify="center">
         <Formik
           initialValues={{ title: "", text: "" }}
@@ -83,7 +83,7 @@ const CreatePost: NextPage<CreatePostProps> = ({}) => {
           )}
         </Formik>
       </Flex>
-    </Box>
+    </Layout>
   );
 };
 
