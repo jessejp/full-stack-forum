@@ -8,6 +8,7 @@ export const POST_FRAGMENT = gql`
     createdAt
     voteStatus
     creator {
+      _id
       username
     }
   }

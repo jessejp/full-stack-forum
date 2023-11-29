@@ -1,11 +1,12 @@
 import NavBar from "@/components/NavBar";
-import { PostsQuery } from "@/generated/graphql";
+import { MeQuery, PostsQuery } from "@/generated/graphql";
 import { POSTS_QUERY } from "@/graphql/queries/posts";
 import Link from "next/link";
 import { Box, Button, Flex, Heading, Stack } from "@chakra-ui/react";
 import { useQuery } from "@apollo/client";
 import PostItem from "@/components/PostItem";
 import Layout from "@/components/Layout";
+import { ME_QUERY } from "@/graphql/queries/me";
 
 export default function Home() {
   const { data, loading, fetchMore } = useQuery<PostsQuery>(POSTS_QUERY, {
@@ -15,6 +16,8 @@ export default function Home() {
     },
     notifyOnNetworkStatusChange: true,
   });
+
+  const { data: meData } = useQuery<MeQuery>(ME_QUERY);
 
   const { posts, hasMore } = data?.posts || {};
 
@@ -36,7 +39,9 @@ export default function Home() {
         {loading && <Box>Loading...</Box>}
         {!loading && !posts && <Box>No posts found.</Box>}
         {!!posts &&
-          posts.map((post) => <PostItem key={post._id} post={post} />)}
+          posts.map((post) => (
+            <PostItem key={post._id} post={post} userId={meData?.me?._id} />
+          ))}
         {!!posts && hasMore && (
           <Button
             isLoading={loading}

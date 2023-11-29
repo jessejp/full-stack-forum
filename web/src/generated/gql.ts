@@ -13,10 +13,11 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Therefore it is highly recommended to use the babel or swc plugin for production.
  */
 const documents = {
-    "\n  fragment PostFragmentFields on Post {\n    _id\n    title\n    points\n    createdAt\n    voteStatus\n    creator {\n      username\n    }\n  }\n": types.PostFragmentFieldsFragmentDoc,
+    "\n  fragment PostFragmentFields on Post {\n    _id\n    title\n    points\n    createdAt\n    voteStatus\n    creator {\n      _id\n      username\n    }\n  }\n": types.PostFragmentFieldsFragmentDoc,
     "\n  mutation changePassword($newPassword: String!, $token: String!) {\n    changePassword(newPassword: $newPassword, token: $token) {\n      errors {\n        field\n        message\n      }\n      user {\n        _id\n        email\n        username\n        createdAt\n        updatedAt\n      }\n    }\n  }\n": types.ChangePasswordDocument,
     "\n  mutation createPost($input: PostInput!) {\n    createPost(input: $input) {\n      _id\n      createdAt\n      points\n      title\n      text\n      creatorId\n    }\n  }\n": types.CreatePostDocument,
     "\n  mutation deletePost($id: Int!) {\n    deletePost(_id: $id)\n  }\n": types.DeletePostDocument,
+    "\n  mutation updatePost($text: String!, $title: String!, $id: Int!) {\n    updatePost(text: $text, title: $title, _id: $id) {\n      _id\n      title\n      text\n      textSnippet\n    }\n  }\n": types.UpdatePostDocument,
     "\n  mutation forgotPassword($email: String!) {\n    forgotPassword(email: $email)\n  }\n": types.ForgotPasswordDocument,
     "\n  mutation login($usernameOrEmail: String!, $password: String!) {\n    login(usernameOrEmail: $usernameOrEmail, password: $password) {\n      errors {\n        field\n        message\n      }\n      user {\n        _id\n        username\n      }\n    }\n  }\n": types.LoginDocument,
     "\n  mutation logout {\n    logout\n  }\n": types.LogoutDocument,
@@ -44,7 +45,7 @@ export function graphql(source: string): unknown;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  fragment PostFragmentFields on Post {\n    _id\n    title\n    points\n    createdAt\n    voteStatus\n    creator {\n      username\n    }\n  }\n"): (typeof documents)["\n  fragment PostFragmentFields on Post {\n    _id\n    title\n    points\n    createdAt\n    voteStatus\n    creator {\n      username\n    }\n  }\n"];
+export function graphql(source: "\n  fragment PostFragmentFields on Post {\n    _id\n    title\n    points\n    createdAt\n    voteStatus\n    creator {\n      _id\n      username\n    }\n  }\n"): (typeof documents)["\n  fragment PostFragmentFields on Post {\n    _id\n    title\n    points\n    createdAt\n    voteStatus\n    creator {\n      _id\n      username\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -57,6 +58,10 @@ export function graphql(source: "\n  mutation createPost($input: PostInput!) {\n
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation deletePost($id: Int!) {\n    deletePost(_id: $id)\n  }\n"): (typeof documents)["\n  mutation deletePost($id: Int!) {\n    deletePost(_id: $id)\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation updatePost($text: String!, $title: String!, $id: Int!) {\n    updatePost(text: $text, title: $title, _id: $id) {\n      _id\n      title\n      text\n      textSnippet\n    }\n  }\n"): (typeof documents)["\n  mutation updatePost($text: String!, $title: String!, $id: Int!) {\n    updatePost(text: $text, title: $title, _id: $id) {\n      _id\n      title\n      text\n      textSnippet\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

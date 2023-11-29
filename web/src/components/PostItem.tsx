@@ -6,7 +6,12 @@ import {
   VoteMutation,
 } from "@/generated/graphql";
 import { Flex, Heading, Box, IconButton } from "@chakra-ui/react";
-import { DeleteIcon, TriangleDownIcon, TriangleUpIcon } from "@chakra-ui/icons";
+import {
+  DeleteIcon,
+  EditIcon,
+  TriangleDownIcon,
+  TriangleUpIcon,
+} from "@chakra-ui/icons";
 import React from "react";
 import { gql, useMutation } from "@apollo/client";
 import { VOTE_MUTATION } from "@/graphql/mutations/vote";
@@ -15,12 +20,13 @@ import { DELETE_POST } from "@/graphql/mutations/deletePost";
 
 interface PostItemProps {
   post: PostFragmentFieldsFragment & {
-    textSnippet?: string | undefined;
-    text?: string | undefined;
+    textSnippet?: string;
+    text?: string;
   };
+  userId?: number;
 }
 
-const PostItem: React.FC<PostItemProps> = ({ post }) => {
+const PostItem: React.FC<PostItemProps> = ({ post, userId }) => {
   const isFullPost = !!post.text;
   const [voteMutation, { loading }] = useMutation<VoteMutation>(VOTE_MUTATION);
 
@@ -127,22 +133,28 @@ const PostItem: React.FC<PostItemProps> = ({ post }) => {
           posted by {post.creator.username}
         </Box>
       </Flex>
-      <Flex>
-        <IconButton
-          aria-label="delete post"
-          icon={<DeleteIcon />}
-          onClick={async () => {
-            await deleteMutation({
-              variables: {
-                id: post._id,
-              },
-              update: (cache) => {
-                
-              },
-            });
-          }}
-        />
-      </Flex>
+      {post.creator._id === userId && (
+        <Flex direction={"column"} gap={2}>
+          <IconButton
+            aria-label="delete post"
+            icon={<DeleteIcon />}
+            onClick={async () => {
+              await deleteMutation({
+                variables: {
+                  id: post._id,
+                },
+                update: (cache) => {},
+              });
+            }}
+          />
+          <IconButton
+            as={Link}
+            href={`/post/edit/${post._id}`}
+            aria-label="delete post"
+            icon={<EditIcon />}
+          />
+        </Flex>
+      )}
     </Flex>
   );
 };
