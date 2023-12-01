@@ -143,7 +143,9 @@ const PostItem: React.FC<PostItemProps> = ({ post, userId }) => {
                 variables: {
                   id: post._id,
                 },
-                update: (cache) => {},
+                update: (cache) => {
+                  cache.evict({ id: `Post:${post._id}` });
+                },
               });
             }}
           />

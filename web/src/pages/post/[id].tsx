@@ -1,21 +1,18 @@
 import Layout from "@/components/Layout";
 import PostItem from "@/components/PostItem";
-import { ReadPostQuery } from "@/generated/graphql";
+import { MeQuery, ReadPostQuery } from "@/generated/graphql";
+import { ME_QUERY } from "@/graphql/queries/me";
 import { READ_POST } from "@/graphql/queries/readPost";
-import { createApolloClient } from "@/utils/createApolloClient";
 import { useQuery } from "@apollo/client";
 import { Box } from "@chakra-ui/react";
-import type {
-  InferGetServerSidePropsType,
-  NextPage,
-  GetServerSideProps,
-} from "next";
+import type { NextPage } from "next";
 import { useRouter } from "next/router";
-import React from "react";
 
 const Post: NextPage = () => {
   const { id } = useRouter().query;
   const badId = !id || typeof id !== "string";
+
+  const { data: meData } = useQuery<MeQuery>(ME_QUERY);
 
   const { data } = useQuery<ReadPostQuery>(READ_POST, {
     variables: {
@@ -36,7 +33,7 @@ const Post: NextPage = () => {
 
   return (
     <Layout>
-      <PostItem post={post} />
+      <PostItem post={post} userId={meData?.me?._id} />
     </Layout>
   );
 };

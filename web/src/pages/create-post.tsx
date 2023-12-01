@@ -23,7 +23,6 @@ const CreatePost: NextPage<CreatePostProps> = ({}) => {
         <Formik
           initialValues={{ title: "", text: "" }}
           onSubmit={async (values, { setErrors }) => {
-            console.log(values);
             if (values.title.length < 1) {
               setErrors({ title: "Title must be at least 1 character long" });
               return;
