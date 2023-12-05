@@ -9,6 +9,7 @@ import type { NextPage } from "next";
 import React from "react";
 import { useRouter } from "next/router";
 import { useIsAuth } from "@/utils/useIsAuth";
+import Layout from "@/components/Layout";
 
 interface CreatePostProps {}
 
@@ -17,13 +18,11 @@ const CreatePost: NextPage<CreatePostProps> = ({}) => {
   const router = useRouter();
   const [createPost] = useMutation<CreatePostMutation>(CREATE_POST);
   return (
-    <Box>
-      <NavBar />
+    <Layout>
       <Flex align="center" justify="center">
         <Formik
           initialValues={{ title: "", text: "" }}
           onSubmit={async (values, { setErrors }) => {
-            console.log(values);
             if (values.title.length < 1) {
               setErrors({ title: "Title must be at least 1 character long" });
               return;
@@ -83,7 +82,7 @@ const CreatePost: NextPage<CreatePostProps> = ({}) => {
           )}
         </Formik>
       </Flex>
-    </Box>
+    </Layout>
   );
 };
 

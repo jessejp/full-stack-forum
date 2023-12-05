@@ -1,17 +1,36 @@
-import { PostsQuery, VoteMutation } from "@/generated/graphql";
+import {
+  DeletePostMutation,
+  PostFragmentFieldsFragment,
+  PostsQuery,
+  ReadPostQuery,
+  VoteMutation,
+} from "@/generated/graphql";
 import { Flex, Heading, Box, IconButton } from "@chakra-ui/react";
-import { TriangleDownIcon, TriangleUpIcon } from "@chakra-ui/icons";
+import {
+  DeleteIcon,
+  EditIcon,
+  TriangleDownIcon,
+  TriangleUpIcon,
+} from "@chakra-ui/icons";
 import React from "react";
 import { gql, useMutation } from "@apollo/client";
 import { VOTE_MUTATION } from "@/graphql/mutations/vote";
+import Link from "next/link";
+import { DELETE_POST } from "@/graphql/mutations/deletePost";
 
 interface PostItemProps {
-  post: PostsQuery["posts"]["posts"][0];
+  post: PostFragmentFieldsFragment & {
+    textSnippet?: string;
+    text?: string;
+  };
+  userId?: number;
 }
 
-const PostItem: React.FC<PostItemProps> = ({ post }) => {
-  const [voteMutation, { data, loading }] =
-    useMutation<VoteMutation>(VOTE_MUTATION);
+const PostItem: React.FC<PostItemProps> = ({ post, userId }) => {
+  const isFullPost = !!post.text;
+  const [voteMutation, { loading }] = useMutation<VoteMutation>(VOTE_MUTATION);
+
+  const [deleteMutation] = useMutation<DeletePostMutation>(DELETE_POST);
 
   const handleVote: (voteValue: 1 | -1) => void = async (voteValue) => {
     if (post.voteStatus === voteValue) return;
@@ -67,7 +86,7 @@ const PostItem: React.FC<PostItemProps> = ({ post }) => {
       p={4}
       borderRadius={4}
       gap={4}
-      align={"center"}
+      align={"start"}
     >
       <Flex direction={"column"} gap={1}>
         <IconButton
@@ -94,13 +113,50 @@ const PostItem: React.FC<PostItemProps> = ({ post }) => {
           }}
         />
       </Flex>
-      <Flex direction={"column"} gap={2}>
-        <Heading size={"md"}>{post.title}</Heading>
-        <Box>{post.textSnippet}</Box>
+      <Flex direction={"column"} gap={2} w={"full"}>
+        <Heading
+          as={!isFullPost ? Link : undefined}
+          href={`/post/${post._id}`}
+          size={"md"}
+          color={!isFullPost ? "blue.600" : undefined}
+          _hover={
+            !isFullPost
+              ? { textDecor: "underline", color: "blue.400" }
+              : undefined
+          }
+          _visited={!isFullPost ? { color: "purple.500" } : undefined}
+        >
+          {post.title}
+        </Heading>
+        <Box>{isFullPost ? post.text : `${post.textSnippet}...`}</Box>
         <Box color={"purple"} fontSize={"small"}>
           posted by {post.creator.username}
         </Box>
       </Flex>
+      {post.creator._id === userId && (
+        <Flex direction={"column"} gap={2}>
+          <IconButton
+            aria-label="delete post"
+            icon={<DeleteIcon />}
+            onClick={async () => {
+              await deleteMutation({
+                variables: {
+                  id: post._id,
+                },
+                update: (cache) => {
+                  cache.evict({ id: `Post:${post._id}` });
+                },
+              });
+            }}
+          />
+          <IconButton
+            as={Link}
+            href={`/post/edit/${post._id}`}
+            aria-label="delete post"
+            icon={<EditIcon />}
+          />
+        </Flex>
+      )}
     </Flex>
   );
 };

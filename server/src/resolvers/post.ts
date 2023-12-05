@@ -58,7 +58,7 @@ export class PostResolver {
     }
 
     let cursorIdx: number | null = null;
-    
+
     if (cursor) {
       replacements.push(cursor);
       cursorIdx = replacements.length;
@@ -93,8 +93,41 @@ export class PostResolver {
   }
 
   @Query(() => Post, { nullable: true })
-  readPost(@Arg("_id", () => Int) _id: number): Promise<Post | null> {
-    return Post.findOne({ where: { _id } });
+  async readPost(
+    @Arg("_id", () => Int) _id: number,
+    @Ctx() { req }: MyContext
+  ): Promise<Post | null> {
+    const replacements: any[] = [_id];
+
+    const userId = req.session.userId;
+
+    if (userId) {
+      replacements.push(userId);
+    }
+
+    const post: [Post] | null = await PostgresDataSource.query(
+      `
+      SELECT p.*,
+      json_build_object(
+        '_id', u._id,
+        'username', u.username,
+        'email', u.email
+      ) creator,
+      ${
+        userId
+          ? '(SELECT value FROM vote WHERE "userId" = $2 AND "postId" = p._id) "voteStatus"'
+          : 'null as "voteStatus"'
+      }
+      FROM post p
+      INNER JOIN public.user u ON u._id = p."creatorId"
+      WHERE p._id = $1
+    `,
+      replacements
+    );
+    if (!post || !post.length) {
+      return null;
+    }
+    return post[0];
   }
 
   @Mutation(() => Post)
@@ -110,28 +143,45 @@ export class PostResolver {
   }
 
   @Mutation(() => Post)
+  @UseMiddleware(isAuth)
   async updatePost(
-    @Arg("_id") _id: number,
-    @Arg("title") title: string
+    @Arg("_id", () => Int) _id: number,
+    @Arg("title") title: string,
+    @Arg("text") text: string,
+    @Ctx() { req }: MyContext
   ): Promise<Post | null> {
-    const post = await Post.findOne({ where: { _id } });
-    if (!post) {
+    const result = await PostgresDataSource.createQueryBuilder()
+      .update(Post)
+      .set({ title, text })
+      .where("_id = :id", { id: _id })
+      .andWhere("creatorId = :creatorId", { creatorId: req.session.userId })
+      .returning("*")
+      .execute();
+
+    if (!result.raw.length) {
       return null;
     }
-    if (typeof title !== "undefined") {
-      await Post.update({ _id: post._id }, { title });
-    }
-    return post;
+
+    return result.raw[0];
   }
 
+  @UseMiddleware(isAuth)
   @Mutation(() => Boolean)
-  async deletePost(@Arg("_id") _id: number): Promise<boolean> {
-    try {
-      await Post.delete({ _id });
-      return true;
-    } catch {
+  async deletePost(
+    @Arg("_id", () => Int) _id: number,
+    @Ctx() { req }: MyContext
+  ): Promise<boolean> {
+    const post = await Post.findOne({ where: { _id } });
+    if (!post) {
       return false;
     }
+    if (post.creatorId !== req.session.userId) {
+      throw new Error("not authorized");
+    }
+
+    await Vote.delete({ postId: _id });
+    await Post.delete({ _id, creatorId: req.session.userId });
+    return true;
   }
 
   @Mutation(() => Boolean)

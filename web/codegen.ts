@@ -7,10 +7,10 @@ const config: CodegenConfig = {
   generates: {
     "src/generated/": {
       preset: "client",
-      plugins: [
-        "typescript",
-        "typescript-operations",
-      ],
+      plugins: ["typescript", "typescript-operations"],
+      presetConfig: {
+        fragmentMasking: false,
+      },
     },
   },
 };
