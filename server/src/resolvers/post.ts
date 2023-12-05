@@ -17,6 +17,7 @@ import {
 import { isAuth } from "../middleware/isAuth";
 import { PostgresDataSource } from "../utils/DataSource";
 import { Vote } from "../entities/Vote";
+import { User } from "../entities/User";
 
 @InputType()
 class PostInput {
@@ -39,6 +40,11 @@ export class PostResolver {
   @FieldResolver(() => String)
   textSnippet(@Root() root: Post) {
     return root.text.slice(0, 80);
+  }
+
+  @FieldResolver(() => User)
+  creator(@Root() post: Post, @Ctx() { userLoader }: MyContext) {
+    return userLoader.load(post.creatorId);
   }
 
   @Query(() => PaginatedPosts)
@@ -67,18 +73,12 @@ export class PostResolver {
     const posts = await PostgresDataSource.query(
       `
       SELECT p.*,
-      json_build_object(
-        '_id', u._id,
-        'username', u.username,
-        'email', u.email
-      ) creator,
       ${
         userId
           ? '(SELECT value FROM vote WHERE "userId" = $2 AND "postId" = p._id) "voteStatus"'
           : 'null as "voteStatus"'
       }
       FROM post p
-      INNER JOIN public.user u ON u._id = p."creatorId"
       ${cursor ? `WHERE p."createdAt" < $${cursorIdx}` : ""}
       ORDER BY p."createdAt" DESC
       LIMIT $1
@@ -93,41 +93,8 @@ export class PostResolver {
   }
 
   @Query(() => Post, { nullable: true })
-  async readPost(
-    @Arg("_id", () => Int) _id: number,
-    @Ctx() { req }: MyContext
-  ): Promise<Post | null> {
-    const replacements: any[] = [_id];
-
-    const userId = req.session.userId;
-
-    if (userId) {
-      replacements.push(userId);
-    }
-
-    const post: [Post] | null = await PostgresDataSource.query(
-      `
-      SELECT p.*,
-      json_build_object(
-        '_id', u._id,
-        'username', u.username,
-        'email', u.email
-      ) creator,
-      ${
-        userId
-          ? '(SELECT value FROM vote WHERE "userId" = $2 AND "postId" = p._id) "voteStatus"'
-          : 'null as "voteStatus"'
-      }
-      FROM post p
-      INNER JOIN public.user u ON u._id = p."creatorId"
-      WHERE p._id = $1
-    `,
-      replacements
-    );
-    if (!post || !post.length) {
-      return null;
-    }
-    return post[0];
+  async readPost(@Arg("_id", () => Int) _id: number): Promise<Post | null> {
+    return Post.findOne({ where: { _id } });
   }
 
   @Mutation(() => Post)

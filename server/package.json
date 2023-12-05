@@ -14,6 +14,7 @@
     "argon2": "^0.31.2",
     "connect-redis": "^7.1.0",
     "cors": "^2.8.5",
+    "dataloader": "^2.2.2",
     "dotenv-safe": "^8.2.0",
     "email-validator": "^2.0.4",
     "express": "^4.18.2",

@@ -13,6 +13,7 @@ import session from "express-session";
 import { COOKIE_NAME, __prod__ } from "./constants";
 import Redis from "ioredis";
 import { PostgresDataSource } from "./utils/DataSource";
+import { createUserLoader } from "./utils/createUserLoader";
 
 const main = async () => {
   await PostgresDataSource.initialize();
@@ -66,7 +67,8 @@ const main = async () => {
     expressMiddleware(server, {
       context: async ({ req, res }) => {
         req.headers["x-forwarded-proto"] = "https";
-        return { req, res, redis };
+        return { req, res, redis, userLoader: createUserLoader() 
+        };
       },
     })
   );
