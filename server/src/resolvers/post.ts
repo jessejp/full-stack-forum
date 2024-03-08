@@ -47,39 +47,37 @@ export class PostResolver {
     return userLoader.load(post.creatorId);
   }
 
+  @FieldResolver(() => Int, { nullable: true })
+  async voteStatus(@Root() post: Post, @Ctx() { voteLoader, req }: MyContext) {
+    if (!req.session.userId) return null;
+
+    const vote = await voteLoader.load({
+      postId: post._id,
+      userId: req.session.userId,
+    });
+
+    return vote ? vote.value : null;
+  }
+
   @Query(() => PaginatedPosts)
   async posts(
     @Arg("limit", () => Int) limit: number,
-    @Arg("cursor", () => String, { nullable: true }) cursor: string | null,
-    @Ctx() { req }: MyContext
+    @Arg("cursor", () => String, { nullable: true }) cursor: string | null
   ): Promise<PaginatedPosts> {
     const realLimit = Math.min(50, limit);
     const tommiStrat = realLimit + 1;
-    const userId = req.session.userId;
 
     const replacements: any[] = [tommiStrat];
 
-    if (userId) {
-      replacements.push(userId);
-    }
-
-    let cursorIdx: number | null = null;
-
     if (cursor) {
       replacements.push(cursor);
-      cursorIdx = replacements.length;
     }
 
     const posts = await PostgresDataSource.query(
       `
-      SELECT p.*,
-      ${
-        userId
-          ? '(SELECT value FROM vote WHERE "userId" = $2 AND "postId" = p._id) "voteStatus"'
-          : 'null as "voteStatus"'
-      }
+      SELECT p.*
       FROM post p
-      ${cursor ? `WHERE p."createdAt" < $${cursorIdx}` : ""}
+      ${cursor ? 'WHERE p."createdAt" < $2' : ""}
       ORDER BY p."createdAt" DESC
       LIMIT $1
     `,
